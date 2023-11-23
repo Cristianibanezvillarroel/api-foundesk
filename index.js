@@ -5,6 +5,16 @@ const { readFile } = require('./fileSystem')
 const { readData } = require('./functions')
 require('dotenv').config()
 const port = process.env.PORT;
+const cors = require('cors')
+
+const corsOptions = {
+    origin: '*',
+    methods: 'GET,PUT,POST,DELETE',
+    credentials: true,
+    optionsSuccessStatus: 204
+}
+
+app.use(cors(corsOptions))
 
 app.use(bodyParser.json())
 
