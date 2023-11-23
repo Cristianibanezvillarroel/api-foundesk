@@ -8,7 +8,7 @@ const port = process.env.PORT;
 const cors = require('cors')
 
 const corsOptions = {
-    origin: 'https://cristianibanezvillarroel.github.io',
+    origin: 'https://cristianibanezvillarroel.github.io/',
     credentials: true,
     methods: 'GET,PUT,POST,DELETE',
     optionsSuccessStatus: 204
