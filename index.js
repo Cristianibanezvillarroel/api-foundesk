@@ -8,7 +8,7 @@ const port = process.env.PORT;
 const cors = require('cors')
 
 const corsOptions = {
-    origin: '*',
+    origin: 'http://localhost:5173',
     methods: 'GET,PUT,POST,DELETE',
     credentials: true,
     optionsSuccessStatus: 204
