@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser')
 const { readFile } = require('./fileSystem')
-const { readData } = require('./functions')
+const { readData, readDataCategories } = require('./functions')
 require('dotenv').config()
 const port = process.env.PORT;
 const cors = require('cors')
@@ -36,6 +36,10 @@ app.get('/db/:id', (req, res) => {
     if (db == 'courses') {
         const data = readData()
         res.json(data.Courses)
+    }
+    if (db == 'coursescategories') {
+        const dataCategories = readDataCategories()
+        res.json(dataCategories.CoursesCategories)
     }
 })
 

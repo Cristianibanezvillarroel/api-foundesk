@@ -9,4 +9,13 @@ const readData = () => {
     }
 }
 
-module.exports = { readData }
+const readDataCategories = () => {
+    try {
+        const dataCategories = fs2.readFileSync('./dbCoursesCategories.json')
+        return JSON.parse(dataCategories)
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+module.exports = { readData, readDataCategories }
