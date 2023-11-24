@@ -18,4 +18,31 @@ const readDataCategories = () => {
     }
 }
 
-module.exports = { readData, readDataCategories }
+const readDataBlogs = () => {
+    try {
+        const dataBlogs = fs2.readFileSync('./dbBlogs.json')
+        return JSON.parse(dataBlogs)
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const readDataCustomerTestimonials = () => {
+    try {
+        const dataCustomerTestimonials = fs2.readFileSync('./dbCustomerTestimonials.json')
+        return JSON.parse(dataCustomerTestimonials)
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const readDataTemplates = () => {
+    try {
+        const dataTemplates = fs2.readFileSync('./dbTemplates.json')
+        return JSON.parse(dataTemplates)
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+module.exports = { readData, readDataCategories, readDataBlogs, readDataCustomerTestimonials, readDataTemplates }

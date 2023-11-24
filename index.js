@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser')
 const { readFile } = require('./fileSystem')
-const { readData, readDataCategories } = require('./functions')
+const { readData, readDataCategories, readDataBlogs, readDataCustomerTestimonials, readDataTemplates } = require('./functions')
 require('dotenv').config()
 const port = process.env.PORT;
 const cors = require('cors')
@@ -14,7 +14,7 @@ const corsOptions = {
     optionsSuccessStatus: 204
 }
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.header("'Access-Control-Allow-Origin' : 'https://cristianibanezvillarroel.github.io'");
     res.header("'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'");
     next();
@@ -33,19 +33,39 @@ app.get('/home/:id', (req, res) => {
 
 app.get('/db/:id', (req, res) => {
     const db = req.params.id
-    if (db == 'courses') {
-        const data = readData()
-        res.json(data.Courses)
-    }
-    if (db == 'coursescategories') {
-        const dataCategories = readDataCategories()
-        res.json(dataCategories.CoursesCategories)
+    switch (db) {
+        case 'courses':
+            const data = readData()
+            res.json(data.Courses)
+            break;
+        case 'coursescategories':
+            const dataCategories = readDataCategories()
+            res.json(dataCategories.CoursesCategories)
+            break;
+        case 'blogs':
+            const dataBlogs = readDataBlogs()
+            res.json(dataBlogs.Blogs)
+            break;
+        case 'customertestimonials':
+            const dataCustomerTestimonials = readDataCustomerTestimonials()
+            res.json(dataCustomerTestimonials.CustomerTestimonials)
+            break;
+        case 'templates':
+            const dataTemplates = readDataTemplates()
+            res.json(dataTemplates.Templates)
+            break;
+
+        default:
+        case 'courses':
+            const data2 = readData()
+            res.json(data2.Courses)
+            break;
     }
 })
 
 app.post('/user', (req, res) => {
     const user = req.body
-    const newuser = {id: 1, ...user }
+    const newuser = { id: 1, ...user }
     res.json({
         mensaje: 'usuario creado con exito',
         usuario: newuser
