@@ -3,10 +3,10 @@ const CoursesCategoriesDetail = require('../models/CoursesCategoriesDetail.model
 const getCoursesCategoriesDetail = async (req, res) => {
     try {
         const resp = await CoursesCategoriesDetail.find()
-        return res.json({
+        return res.json([{
             message: 'CoursesCategoriesDetail',
             items: resp
-        })
+        }])
     } catch (error) {
         return res.json({
             messaje: 'Error',
