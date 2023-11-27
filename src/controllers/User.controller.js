@@ -45,7 +45,7 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.body
         const userFind = await User.findOne({ email })
-        const isCorrectPassword = bcrypt.compare(password, userFind.password)
+        const isCorrectPassword = bcrypt.compareSync(password, userFind.password)
         if(isCorrectPassword){
             return res.json({
                 message: "OK",
