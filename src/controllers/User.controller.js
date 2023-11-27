@@ -45,13 +45,21 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.body
         const userFind = await User.findOne({ email })
-        const isCorrectPassword = bcrypt.compareSync(password, userFind.password)
-        if(isCorrectPassword){
+        if(!userFind){
             return res.json({
-                message: "OK",
-                detail: {user: userFind, token: userFind.generateJWT()}
+                message: "usuario no encontrado"
             })
         }
+        const isCorrectPassword = bcrypt.compareSync(password, userFind.password)
+        if(!isCorrectPassword){
+            return res.json({
+                message: "error de password"                
+            })
+        }
+        return res.json({
+            message: "OK",
+            detail: {user: userFind, token: userFind.generateJWT()}
+        })
     } catch (error) {
         return res.json({
             message: "Error",
