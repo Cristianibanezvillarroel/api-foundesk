@@ -1,4 +1,5 @@
 const User = require('../models/User.model')
+const bcrypt = require('bcrypt')
 
 const getUser = async (req, res) => {
     try {
@@ -19,7 +20,7 @@ const getUser = async (req, res) => {
 
 const postUser = async (req, res) => {
     try {
-        const { email } = req.body
+        const { email, password } = req.body
         const existingUser = await User.findOne({ email })
         if (existingUser) {
             return res.json({
@@ -27,6 +28,7 @@ const postUser = async (req, res) => {
             })
         }
         const user = new User(req.body)
+        user.hashPassword(password)
         await user.save()
         return res.json({
             message: "Su cuenta se ha creado exitosamente. Ingrese a la plataforma en la seccion de Login."
