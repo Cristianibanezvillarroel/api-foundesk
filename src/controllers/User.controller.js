@@ -19,17 +19,17 @@ const getUser = async (req, res) => {
 
 const postUser = async (req, res) => {
     try {
-        const { email, name, password, idItem } = req.body
-        const existingUser = await User.findOne({email})
-        if(existingUser){
+        const { email } = req.body
+        const existingUser = await User.findOne({ email })
+        if (existingUser) {
             return res.json({
-                message: "Su cuenta de usuario ya se encuentra registrada en Foundesk."
+                message: "Usted ya tiene una cuenta de usuario activada en Foundesk. Ingrese a la plataforma en la seccion de Login."
             })
         }
-        const User = new User(req.body)
-        await User.save()
+        const user = new User(req.body)
+        await user.save()
         return res.json({
-            message: "Se ha registrado exitosamente su cuenta en Foundesk."
+            message: "Su cuenta se ha creado exitosamente. Ingrese a la plataforma en la seccion de Login."
         })
     } catch (error) {
         return res.json({
