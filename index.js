@@ -3,8 +3,8 @@ mongoose = require('mongoose'),
 routes = require('./src/routes/index')
 const app = express();
 const bodyParser = require('body-parser')
-const { readFile } = require('./fileSystem')
-const { readData, readDataCategories, readDataBlogs, readDataCustomerTestimonials, readDataTemplates } = require('./functions')
+//const { readFile } = require('./fileSystem')
+//const { readData, readDataCategories, readDataBlogs, readDataCustomerTestimonials, readDataTemplates } = require('./functions')
 require('dotenv').config()
 const port = process.env.PORT;
 const cors = require('cors')
@@ -31,7 +31,7 @@ app.use('/v1', routes)
 mongoose.connect(process.env.MONGO_URI)
 
 
-app.get('/home/:id', (req, res) => {
+/*app.get('/home/:id', (req, res) => {
     res.json({
         mensaje: req.params.id
     })
@@ -76,7 +76,7 @@ app.post('/user', (req, res) => {
         mensaje: 'usuario creado con exito',
         usuario: newuser
     })
-})
+})*/
 
 app.listen(port, () => {
     console.log(`la api de foundesk esta escuchando en el puerto: ${port} y la uri de la base de datos es: ${process.env.MONGO_URI}`)
