@@ -3,12 +3,16 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const secret = process.env.SECRET_JWT
 
-
 const userSchema = new mongoose.Schema({
     email: {type: String},
     name: {type: String},
     password: {type: String},
-    idItem: {type: Number}
+    idItem: {type: Number},
+    address: {type: String},
+    city: {type: String},
+    country: {type: String},
+    lastname: {type: String},
+    phone: {type: String} 
 }, {collection: 'user'})
 
 userSchema.methods.hashPassword = function(password){

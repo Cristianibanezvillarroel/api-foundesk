@@ -11,6 +11,7 @@ const cors = require('cors')
 
 const corsOptions = {
     origin: 'https://cristianibanezvillarroel.github.io',
+    //origin: '*',
     credentials: true,
     methods: 'GET,PUT,POST,DELETE',
     optionsSuccessStatus: 204
@@ -18,6 +19,7 @@ const corsOptions = {
 
 app.use(function (req, res, next) {
     res.header("'Access-Control-Allow-Origin' : 'https://cristianibanezvillarroel.github.io'");
+    //res.header("'Access-Control-Allow-Origin' : '*'");
     res.header("'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'");
     next();
 })
@@ -30,53 +32,6 @@ app.use('/v1', routes)
 
 mongoose.connect(process.env.MONGO_URI)
 
-
-/*app.get('/home/:id', (req, res) => {
-    res.json({
-        mensaje: req.params.id
-    })
-})
-
-app.get('/db/:id', (req, res) => {
-    const db = req.params.id
-    switch (db) {
-        case 'courses':
-            const data = readData()
-            res.json(data.Courses)
-            break;
-        case 'coursescategories':
-            const dataCategories = readDataCategories()
-            res.json(dataCategories.CoursesCategories)
-            break;
-        case 'blogs':
-            const dataBlogs = readDataBlogs()
-            res.json(dataBlogs.Blogs)
-            break;
-        case 'customertestimonials':
-            const dataCustomerTestimonials = readDataCustomerTestimonials()
-            res.json(dataCustomerTestimonials.CustomerTestimonials)
-            break;
-        case 'templates':
-            const dataTemplates = readDataTemplates()
-            res.json(dataTemplates.Templates)
-            break;
-
-        default:
-        case 'courses':
-            const data2 = readData()
-            res.json(data2.Courses)
-            break;
-    }
-})
-
-app.post('/user', (req, res) => {
-    const user = req.body
-    const newuser = { id: 1, ...user }
-    res.json({
-        mensaje: 'usuario creado con exito',
-        usuario: newuser
-    })
-})*/
 
 app.listen(port, () => {
     console.log(`la api de foundesk esta escuchando en el puerto: ${port} y la uri de la base de datos es: ${process.env.MONGO_URI}`)

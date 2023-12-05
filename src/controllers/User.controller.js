@@ -45,21 +45,73 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.body
         const userFind = await User.findOne({ email })
-        if(!userFind){
+        if (!userFind) {
             return res.json({
                 message: "usuario no encontrado"
             })
         }
         const isCorrectPassword = bcrypt.compareSync(password, userFind.password)
-        if(!isCorrectPassword){
+        if (!isCorrectPassword) {
             return res.json({
-                message: "error de password"                
+                message: "error de password"
             })
         }
         return res.json({
             message: "OK",
-            detail: {user: userFind, token: userFind.generateJWT()}
+            detail: { user: userFind, token: userFind.generateJWT() }
         })
+    } catch (error) {
+        return res.json({
+            message: "Error",
+            detail: error.message
+        })
+    }
+}
+
+const updateUser = async (req, res) => {
+    try {
+        const newData = req.body
+        const resp = await User.findByIdAndUpdate(
+            newData.id,
+            { $set: newData },
+            { new: true }
+        )
+        return res.json({
+            message: "User updated successfully"
+        })
+
+    } catch (error) {
+        return res.json({
+            message: "Error",
+            detail: error
+        })
+    }
+}
+
+const updatePassword = async (req, res) => {
+    try {
+        
+        const { email, password, newpassword, id} = req.body
+        
+        const userFind = await User.findOne({ email })
+        if (!userFind) {
+            return res.json({
+                message: "usuario no encontrado"
+            })
+        }
+        const isCorrectPassword = bcrypt.compareSync(password, userFind.password)
+        if (!isCorrectPassword) {
+            return res.json({
+                message: "error de password"
+            })
+        }
+
+        userFind.hashPassword(newpassword)
+        await userFind.save()
+        return res.json({
+            message: "OK"
+        })
+
     } catch (error) {
         return res.json({
             message: "Error",
@@ -71,5 +123,7 @@ const login = async (req, res) => {
 module.exports = {
     getUser,
     postUser,
-    login
+    login,
+    updateUser,
+    updatePassword
 }
