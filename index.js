@@ -1,6 +1,6 @@
 const express = require('express'),
-mongoose = require('mongoose'),
-routes = require('./src/routes/index')
+    mongoose = require('mongoose'),
+    routes = require('./src/routes/index')
 const app = express();
 const bodyParser = require('body-parser')
 //const { readFile } = require('./fileSystem')

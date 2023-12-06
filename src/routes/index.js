@@ -7,7 +7,8 @@ coursesCategoriesRouter = require('./CoursesCategories.router'),
 coursesCategoriesDetailRouter = require('./CoursesCategoriesDetail.router'),
 coursesRouter = require('./Courses.router'),
 customerDiaryRouter = require('./CustomerDiary.router'),
-userRouter = require('./User.router')
+userRouter = require('./User.router'),
+mercadopagoRouter = require('./MercadoPago.router')
 
 router.use('/blog', blogRouter)
 router.use('/blogcategories', blogCategoriesRouter)
@@ -17,5 +18,6 @@ router.use('/coursescategoriesdetail', coursesCategoriesDetailRouter)
 router.use('/courses', coursesRouter)
 router.use('/customerdiary', customerDiaryRouter)
 router.use('/user', userRouter)
+router.use('/mercadopago', mercadopagoRouter)
 
 module.exports = router;
