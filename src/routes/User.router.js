@@ -1,11 +1,12 @@
 const express = require('express'),
 router = express.Router(),
-{ getUser, postUser, login, updateUser, updatePassword } = require('../controllers/User.controller')
+{ postUser, login, updateUser, updatePassword, verifyUser } = require('../controllers/User.controller'),
+auth = require('../middlewares/authorization')
 
-router.get('/', getUser)
 router.post('/signup', postUser)
 router.post('/login', login)
-router.post('/update', updateUser)
-router.post('/updatepassword', updatePassword)
+router.put('/update', auth, updateUser)
+router.post('/updatepassword', auth, updatePassword)
+router.get('/verify', auth, verifyUser)
 
 module.exports = router

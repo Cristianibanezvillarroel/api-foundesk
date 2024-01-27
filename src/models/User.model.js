@@ -2,12 +2,12 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const secret = process.env.SECRET_JWT
+//const secret = "opciones"
 
 const userSchema = new mongoose.Schema({
     email: {type: String},
     name: {type: String},
     password: {type: String},
-    idItem: {type: Number},
     address: {type: String},
     city: {type: String},
     country: {type: String},

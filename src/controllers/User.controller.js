@@ -1,7 +1,7 @@
 const User = require('../models/User.model')
 const bcrypt = require('bcrypt')
 
-const getUser = async (req, res) => {
+/*const getUser = async (req, res) => {
     try {
         const resp = await User.find()
         return res.json([{
@@ -16,7 +16,7 @@ const getUser = async (req, res) => {
         })
 
     }
-}
+}*/
 
 const postUser = async (req, res) => {
     try {
@@ -30,8 +30,11 @@ const postUser = async (req, res) => {
         const user = new User(req.body)
         user.hashPassword(password)
         await user.save()
+
+        const userFind = await User.findOne({ email })
         return res.json({
-            message: "Su cuenta se ha creado exitosamente. Ingrese a la plataforma en la seccion de Login."
+            message: "Su cuenta se ha creado exitosamente. Ingrese a la plataforma en la seccion de Login.",
+            detail: { user: userFind, token: userFind.generateJWT() }
         })
     } catch (error) {
         return res.json({
@@ -69,15 +72,19 @@ const login = async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
+
+    const newData = req.body
+
     try {
-        const newData = req.body
+
         const resp = await User.findByIdAndUpdate(
-            newData.id,
-            { $set: newData },
+            req.user,
+            newData,
             { new: true }
-        )
-        return res.json({
-            message: "User updated successfully"
+        ).select("-password")
+
+        res.json({
+            detail: { user: resp }
         })
 
     } catch (error) {
@@ -90,9 +97,9 @@ const updateUser = async (req, res) => {
 
 const updatePassword = async (req, res) => {
     try {
-        
-        const { email, password, newpassword, id} = req.body
-        
+
+        const { email, password, newpassword, id } = req.body
+
         const userFind = await User.findOne({ email })
         if (!userFind) {
             return res.json({
@@ -120,10 +127,25 @@ const updatePassword = async (req, res) => {
     }
 }
 
+const verifyUser = async (req, res) => {
+
+    try {
+
+        const user = await User.findById(req.user).select('-password')
+        res.json({ user })
+
+    } catch (error) {
+        res.status(500).json({
+            msg: "Hubo un error",
+            error
+        })
+    }
+}
+
 module.exports = {
-    getUser,
     postUser,
     login,
     updateUser,
-    updatePassword
+    updatePassword,
+    verifyUser
 }
