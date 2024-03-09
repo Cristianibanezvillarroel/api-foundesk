@@ -8,6 +8,8 @@ const coursesSchema = new mongoose.Schema({
     author: {type: String},
     price: {type: Number},
     description: {type: String},
+    descriptionAdd: {type: String},
+    id_teacher: {type: String},
     imagen: {type: String}
 }, {collection: 'courses'})
 
