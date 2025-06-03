@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const secret = process.env.SECRET_JWT
-//const secret = "opciones"
+//const secret = process.env.SECRET_JWT
+const secret = "opciones"
 
 const userSchema = new mongoose.Schema({
     email: {type: String},
