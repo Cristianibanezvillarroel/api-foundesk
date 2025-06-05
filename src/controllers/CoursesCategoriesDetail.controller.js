@@ -2,7 +2,7 @@ const CoursesCategoriesDetail = require('../models/CoursesCategoriesDetail.model
 
 const getCoursesCategoriesDetail = async (req, res) => {
     try {
-        const resp = await CoursesCategoriesDetail.find()
+        const resp = await CoursesCategoriesDetail.find().populate('id_categoria');
         return res.json([{
             message: 'CoursesCategoriesDetail',
             items: resp
