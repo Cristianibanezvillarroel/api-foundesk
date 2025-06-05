@@ -1,7 +1,10 @@
 const mongoose = require('mongoose')
 
 const coursescategoriesSchema = new mongoose.Schema({
-    categoria: {type: String},
+    categoria: {
+        type: String,
+        required: true
+    },
     idItem: {type: Number}
 }, {collection: 'coursescategories'})
 

@@ -1,9 +1,15 @@
 const mongoose = require('mongoose')
+const CoursesCategories = require('./CoursesCategories.model')
+const { required } = require('nodemon/lib/config')
 
 const coursescategoriesdetailSchema = new mongoose.Schema({
     idItem: {type: Number},
     cantidad: {type: Number},
-    categoria: {type: String},
+    id_categoria: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: CoursesCategories,
+        required: true
+    },
     resena: {type: String},
     description: {type: String},
     imagenicono: {type: String},
