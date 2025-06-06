@@ -2,7 +2,12 @@ const CoursesContentItems = require('../models/CoursesContentItems.model')
 
 const getCoursesContentItems = async (req, res) => {
     try {
-        const resp = await CoursesContentItems.find()
+        const resp = await CoursesContentItems.find().populate('courses');
+        if (!resp || resp.length === 0) {
+            return res.json({
+                message: 'No CoursesContentItems found'
+            });
+        }
         return res.json([{
             message: 'CoursesContentItems',
             items: resp

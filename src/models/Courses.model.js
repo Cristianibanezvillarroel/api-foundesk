@@ -4,7 +4,7 @@ const { required } = require('nodemon/lib/config')
 
 const coursesSchema = new mongoose.Schema({
     idItem: {type: Number},
-    id_categoria: {
+    categorie: {
         type: mongoose.Schema.Types.ObjectId,
         ref: CoursesCategories,
         required: true
@@ -15,7 +15,11 @@ const coursesSchema = new mongoose.Schema({
     price: {type: Number},
     description: {type: String},
     descriptionAdd: {type: String},
-    id_teacher: {type: String},
+    teacher: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: Teacher,
+        required: true
+    },
     imagen: {type: String}
 }, {collection: 'courses'})
 

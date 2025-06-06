@@ -1,7 +1,11 @@
 const mongoose = require('mongoose')
 
 const courseslearnitemsSchema = new mongoose.Schema({
-    id_courses: {type: String},
+    courses: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Courses',
+        required: true
+    },
     description: {type: String}
 }, {collection: 'courseslearnitems'})
 

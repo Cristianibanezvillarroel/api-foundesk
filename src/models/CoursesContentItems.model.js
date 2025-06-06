@@ -1,8 +1,16 @@
 const mongoose = require('mongoose')
 
 const coursescontentitemsSchema = new mongoose.Schema({
-    id_courses: {type: String},
-    id_courses_content_categories: {type: String},
+    courses: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Courses',
+        required: true
+    },
+    coursescontentcategories: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CoursesContentCategories',
+        required: true
+    },
     name: {type: String},
     minutes: {type: Number}
 }, {collection: 'coursescontentitems'})

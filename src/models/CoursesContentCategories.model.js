@@ -1,7 +1,12 @@
+const { refund } = require('mercadopago')
 const mongoose = require('mongoose')
 
 const coursescontentcategoriesSchema = new mongoose.Schema({
-    id_courses: {type: String},
+    courses: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Courses',
+        required: true
+    },
     name: {type: String}
 }, {collection: 'coursescontentcategories'})
 

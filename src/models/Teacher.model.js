@@ -1,7 +1,11 @@
 const mongoose = require('mongoose')
 
 const teacherSchema = new mongoose.Schema({
-    id_user: {type: String},
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     name: {type: String},
     imagen: {type: String},
     pregrado: {type: String},

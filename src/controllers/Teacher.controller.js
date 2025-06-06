@@ -2,7 +2,7 @@ const Teacher = require('../models/Teacher.model')
 
 const getTeacher = async (req, res) => {
     try {
-        const resp = await Teacher.find()
+        const resp = await Teacher.find().populate('user');
         return res.json([{
             message: 'Teacher',
             items: resp
