@@ -2,7 +2,7 @@ const Courses = require('../models/Courses.model')
 
 const getCourses = async (req, res) => {
     try {
-        const resp = await Courses.find().populate('categories');
+        const resp = await Courses.find().populate('categorie');
         return res.json([{
             message: 'Courses',
             items: resp

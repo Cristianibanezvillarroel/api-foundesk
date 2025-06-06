@@ -2,7 +2,7 @@ const CoursesCategoriesDetail = require('../models/CoursesCategoriesDetail.model
 
 const getCoursesCategoriesDetail = async (req, res) => {
     try {
-        const resp = await CoursesCategoriesDetail.find().populate('categories');
+        const resp = await CoursesCategoriesDetail.find().populate('categorie');
         if (!resp || resp.length === 0) {
             return res.json({
                 message: 'No CoursesCategoriesDetail found'
