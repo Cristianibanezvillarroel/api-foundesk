@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const CoursesCategories = require('./CoursesCategories.model')
+const Teacher = require('./Teacher.model')
 const { required } = require('nodemon/lib/config')
 
 const coursesSchema = new mongoose.Schema({
