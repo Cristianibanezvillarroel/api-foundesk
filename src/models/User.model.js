@@ -12,7 +12,8 @@ const userSchema = new mongoose.Schema({
     city: {type: String},
     country: {type: String},
     lastname: {type: String},
-    phone: {type: String} 
+    phone: {type: String},
+    role: { type: String, enum: ['student', 'teacher', 'supervisor', 'admin'], required: true }
 }, {collection: 'user'})
 
 userSchema.methods.hashPassword = function(password){
