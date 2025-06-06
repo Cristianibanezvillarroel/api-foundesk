@@ -1,14 +1,16 @@
 const mongoose = require('mongoose')
+const Courses = require('./Courses.model')
+const CoursesContentCategories = require('./CoursesContentCategories.model')
 
 const coursescontentitemsSchema = new mongoose.Schema({
     courses: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Courses',
+        ref: Courses,
         required: true
     },
     coursescontentcategories: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'CoursesContentCategories',
+        ref: CoursesContentCategories,
         required: true
     },
     name: {type: String},
