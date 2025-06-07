@@ -16,25 +16,25 @@ const enrollUserInCourse = async (req, res) => {
     }
 }
 
-// Obtener todos los cursos de un usuario
+// Obtener todos los cursos de un usuario (userId por body)
 const getCoursesByUser = async (req, res) => {
     try {
-        const { userId } = req.params
-        const courses = await UserCourses.find({ user: userId }).populate('courses')
-        res.json({ courses })
+        const { userId } = req.body;
+        const courses = await UserCourses.find({ user: userId }).populate('courses');
+        res.json({ courses });
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener cursos del usuario', detail: error.message })
+        res.status(500).json({ message: 'Error al obtener cursos del usuario', detail: error.message });
     }
 }
 
-// Obtener todos los usuarios de un curso
+// Obtener todos los usuarios de un curso (courseId por body)
 const getUsersByCourse = async (req, res) => {
     try {
-        const { courseId } = req.params
-        const users = await UserCourses.find({ courses: courseId }).populate('user')
-        res.json({ users })
+        const { courseId } = req.body;
+        const users = await UserCourses.find({ course: courseId }).populate('user');
+        res.json({ users });
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener usuarios del curso', detail: error.message })
+        res.status(500).json({ message: 'Error al obtener usuarios del curso', detail: error.message });
     }
 }
 
