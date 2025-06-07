@@ -4,11 +4,11 @@ const UserCourses = require('../models/UserCourses.model')
 const enrollUserInCourse = async (req, res) => {
     try {
         const { userId, courseId } = req.body
-        const alreadyEnrolled = await UserCourses.findOne({ user: userId, course: courseId })
+        const alreadyEnrolled = await UserCourses.findOne({ user: userId, courses: courseId })
         if (alreadyEnrolled) {
             return res.json({ message: 'El usuario ya está inscrito en este curso.' })
         }
-        const enrollment = new UserCourses({ user: userId, course: courseId })
+        const enrollment = new UserCourses({ user: userId, courses: courseId })
         await enrollment.save()
         res.json({ message: 'Usuario inscrito en el curso exitosamente.', enrollment })
     } catch (error) {
@@ -20,7 +20,7 @@ const enrollUserInCourse = async (req, res) => {
 const getCoursesByUser = async (req, res) => {
     try {
         const { userId } = req.params
-        const courses = await UserCourses.find({ user: userId }).populate('course')
+        const courses = await UserCourses.find({ user: userId }).populate('courses')
         res.json({ courses })
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener cursos del usuario', detail: error.message })
@@ -31,7 +31,7 @@ const getCoursesByUser = async (req, res) => {
 const getUsersByCourse = async (req, res) => {
     try {
         const { courseId } = req.params
-        const users = await UserCourses.find({ course: courseId }).populate('user')
+        const users = await UserCourses.find({ courses: courseId }).populate('user')
         res.json({ users })
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener usuarios del curso', detail: error.message })
