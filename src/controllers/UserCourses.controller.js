@@ -20,7 +20,14 @@ const enrollUserInCourse = async (req, res) => {
 const getCoursesByUser = async (req, res) => {
     try {
         const { userId } = req.body;
-        const resp = await UserCourses.find({ user: userId }).populate('courses');
+        const resp = await UserCourses.find({ user: userId })
+            .populate({
+                path: 'courses',
+                populate: [
+                    { path: 'categorie' },
+                    { path: 'teacher' }
+                ]
+            });
         return res.json([{
             message: 'CoursesByUser',
             items: resp
