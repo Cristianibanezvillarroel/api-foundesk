@@ -7,19 +7,19 @@ const teacherSchema = new mongoose.Schema({
         required: true
     },
     name: {type: String},
-    imagen: {type: String},
-    pregrado: {type: String},
-    institucion_pregrado: {type: String},
-    postgrado: {type: String},
-    institucion_postgrado: {type: String},
-    experiencia: {type: Number},
-    cargo: {type: String},
-    empresa: {type: String},
-    calificacion: {type: Number},
-    valoraciones: {type: Number},
-    estudiantes: {type: Number},
-    cursos: {type: Number},
-    resena: {type: String}
+    image: {type: String},
+    career: {type: String},
+    careerinstitution: {type: String},
+    postgraduate: {type: String},
+    postgraduateinstitution: {type: String},
+    experience: {type: Number},
+    jobtitle: {type: String},
+    company: {type: String},
+    rating: {type: Number},
+    ratings: {type: Number},
+    students: {type: Number},
+    courses: {type: Number},
+    review: {type: String}
 }, {collection: 'teacher'})
 
 const Teacher = mongoose.model('Teacher', teacherSchema)

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const blogcategoriesSchema = new mongoose.Schema({
-    categoria: {type: String},
+    categorie: {type: String},
     idItem : {type: Number}
 }, {collection: 'blogcategories'})
 

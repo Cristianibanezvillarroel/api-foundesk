@@ -8,7 +8,6 @@ const coursesSchema = new mongoose.Schema({
         ref: 'CoursesCategories',
         required: true
     },
-    tipo: {type: String},
     title: {type: String},
     author: {type: String},
     price: {type: Number},
@@ -19,7 +18,7 @@ const coursesSchema = new mongoose.Schema({
         ref: 'Teacher',
         required: true
     },
-    imagen: {type: String}
+    image: {type: String}
 }, {collection: 'courses'})
 
 const Courses = mongoose.model('Courses', coursesSchema)
