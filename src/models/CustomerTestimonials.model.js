@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { use } = require('react')
 
 const customertestimonialsSchema = new mongoose.Schema({
     idItem: {type: Number},
@@ -7,13 +8,15 @@ const customertestimonialsSchema = new mongoose.Schema({
         ref: 'Courses',
         required: true
     },
-    nombre: {type: String},
-    descripcion: {type: String},
-    autor: {type: String},
-    cargo: {type: String},
-    imagen: {type: String},
-    calificacion: {type: Number},
-    timestamp: {type: Date}
+    description: {type: String},
+    image: {type: String},
+    rating: {type: Number},
+    timestamp: {type: Date},
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
 }, {collection: 'customertestimonials'})
 
 const CustomerTestimonials = mongoose.model('CustomerTestimonials', customertestimonialsSchema)

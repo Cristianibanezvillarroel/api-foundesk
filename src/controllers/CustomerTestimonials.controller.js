@@ -2,7 +2,11 @@ const CustomerTestimonials = require('../models/CustomerTestimonials.model')
 
 const getCustomerTestimonials = async (req, res) => {
     try {
-        const resp = await CustomerTestimonials.find().populate('courses');
+        const resp = await CustomerTestimonials.find()
+            .populate([
+                { path: 'courses' },
+                { path: 'user' }
+            ]);
         if (!resp || resp.length === 0) {
             return res.json({
                 message: 'No testimonials found'
@@ -17,7 +21,7 @@ const getCustomerTestimonials = async (req, res) => {
             messaje: 'Error',
             detail: error.message
         })
-        
+
     }
 }
 
