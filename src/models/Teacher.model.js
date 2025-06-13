@@ -7,7 +7,6 @@ const teacherSchema = new mongoose.Schema({
         required: true
     },
     name: {type: String},
-    image: {type: String},
     career: {type: String},
     careerinstitution: {type: String},
     postgraduate: {type: String},

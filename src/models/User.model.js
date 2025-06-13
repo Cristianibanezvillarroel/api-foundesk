@@ -13,7 +13,10 @@ const userSchema = new mongoose.Schema({
     country: {type: String},
     lastname: {type: String},
     phone: {type: String},
-    role: { type: String, enum: ['student', 'teacher', 'supervisor', 'admin'], required: true }
+    role: { type: String, enum: ['student', 'teacher', 'supervisor', 'admin'], required: true },
+    image: {type: String},
+    createdAt: {type: Date, default: Date.now},
+    updatedAt: {type: Date, default: Date.now}
 }, {collection: 'user'})
 
 userSchema.methods.hashPassword = function(password){

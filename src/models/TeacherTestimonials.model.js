@@ -2,11 +2,12 @@ const mongoose = require('mongoose')
 
 const teachertestimonialsSchema = new mongoose.Schema({
     idItem: {type: Number},
-    nombre: {type: String},
-    descripcion: {type: String},
-    autor: {type: String},
-    cargo: {type: String},
-    imagen: {type: String}
+    description: {type: String},
+    teacher: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Teacher',
+        required: true
+    }
 }, {collection: 'teachertestimonials'})
 
 const TeacherTestimonials = mongoose.model('TeacherTestimonials', teachertestimonialsSchema)
