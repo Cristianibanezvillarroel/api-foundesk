@@ -16,7 +16,7 @@ const customertestimonialsSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
-    },
+    }
 }, {collection: 'customertestimonials'})
 
 const CustomerTestimonials = mongoose.model('CustomerTestimonials', customertestimonialsSchema)
