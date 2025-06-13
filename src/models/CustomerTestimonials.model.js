@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const { use } = require('react')
 
 const customertestimonialsSchema = new mongoose.Schema({
     idItem: {type: Number},
