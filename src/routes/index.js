@@ -1,3 +1,5 @@
+const CoursesSectionsItems = require('../models/CoursesSectionsItems.model')
+
 const express = require('express'),
 router = express.Router(),
 blogRouter = require('./Blog.router'),
@@ -11,8 +13,8 @@ coursesRouter = require('./Courses.router'),
 customerDiaryRouter = require('./CustomerDiary.router'),
 userRouter = require('./User.router'),
 coursesLearnItemsRouter = require('./CoursesLearnItems.router'),
-coursesContentCategoriesRouter = require('./CoursesContentCategories.router'),
-coursesContentItemsRouter = require('./CoursesContentItems.router'),
+coursesSectionsRouter = require('./CoursesSections.router'),
+coursesSectionsItemsRouter = require('./CoursesSectionsItems.router'),
 teacherRouter = require('./Teacher.router'),
 mercadopagoRouter = require('./MercadoPago.router'),
 userCoursesRouter = require('./UserCourses.router')
@@ -26,8 +28,8 @@ router.use('/coursescategories', coursesCategoriesRouter)
 router.use('/coursescategoriesdetail', coursesCategoriesDetailRouter)
 router.use('/courses', coursesRouter)
 router.use('/courseslearnitems', coursesLearnItemsRouter)
-router.use('/coursescontentcategories', coursesContentCategoriesRouter)
-router.use('/coursescontentitems', coursesContentItemsRouter)
+router.use('/coursessections', coursesSectionsRouter)
+router.use('/coursessectionsitems', coursesSectionsItemsRouter)
 router.use('/teacher', teacherRouter)
 router.use('/customerdiary', customerDiaryRouter)
 router.use('/user', userRouter)
