@@ -18,7 +18,8 @@ const teacherSchema = new mongoose.Schema({
     ratings: {type: Number},
     students: {type: Number},
     courses: {type: Number},
-    review: {type: String}
+    review: {type: String},
+    image: {type: String}
 }, {collection: 'teacher'})
 
 const Teacher = mongoose.model('Teacher', teacherSchema)

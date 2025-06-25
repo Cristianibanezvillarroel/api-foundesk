@@ -1,5 +1,3 @@
-const CoursesSectionsItems = require('../models/CoursesSectionsItems.model')
-
 const express = require('express'),
 router = express.Router(),
 blogRouter = require('./Blog.router'),
@@ -17,7 +15,17 @@ coursesSectionsRouter = require('./CoursesSections.router'),
 coursesSectionsItemsRouter = require('./CoursesSectionsItems.router'),
 teacherRouter = require('./Teacher.router'),
 mercadopagoRouter = require('./MercadoPago.router'),
-userCoursesRouter = require('./UserCourses.router')
+userCoursesRouter = require('./UserCourses.router'),
+userCoursesNotesRouter = require('./UserCoursesNotes.router'),
+teacherAnnouncementsRouter = require('./TeacherAnnouncements.router'),
+customerCommentsRouter = require('./CustomerComments.router'),
+teacherCommentsRouter = require('./TeacherComments.router'),
+coursesDownloadableRouter = require('./CoursesDownloadable.router'),
+coursesRatingsRouter = require('./CoursesRatings.router'),
+coursesQuestionsRouter = require('./CoursesQuestions.router'),
+coursesAnswersRouter = require('./CoursesAnswers.router'),
+faqRouter = require('./Faq.router'),
+itUsefulRouter = require('./ItUseful.router')
 
 router.use('/blog', blogRouter)
 router.use('/blogcategories', blogCategoriesRouter)
@@ -35,5 +43,15 @@ router.use('/customerdiary', customerDiaryRouter)
 router.use('/user', userRouter)
 router.use('/mercadopago', mercadopagoRouter)
 router.use('/usercourses', userCoursesRouter)
+router.use('/usercoursesnotes', userCoursesNotesRouter)
+router.use('/teacherannouncements', teacherAnnouncementsRouter)
+router.use('/customercomments', customerCommentsRouter)
+router.use('/teachercomments', teacherCommentsRouter)
+router.use('/coursesdownloadable', coursesDownloadableRouter)
+router.use('/coursesratings', coursesRatingsRouter)
+router.use('/coursesquestions', coursesQuestionsRouter)
+router.use('/coursesanswers', coursesAnswersRouter)
+router.use('/faq', faqRouter)
+router.use('/ituseful', itUsefulRouter)
 
 module.exports = router;

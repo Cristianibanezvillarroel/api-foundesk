@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const { required } = require('nodemon/lib/config')
 
 const coursesSchema = new mongoose.Schema({
     idItem: {type: Number},
