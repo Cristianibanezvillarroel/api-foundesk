@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const coursessectionsitemsSchema = new mongoose.Schema({
+const coursessectionslessonsSchema = new mongoose.Schema({
     courses: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Courses',
@@ -13,7 +13,7 @@ const coursessectionsitemsSchema = new mongoose.Schema({
     },
     name: {type: String},
     minutes: {type: Number}
-}, {collection: 'coursessectionsitems'})
+}, {collection: 'coursessectionslessons'})
 
-const CoursesSectionsItems = mongoose.model('CoursesSectionsItems', coursessectionsitemsSchema)
-module.exports = CoursesSectionsItems
+const CoursesSectionsLessons = mongoose.model('CoursesSectionsLessons', coursessectionslessonsSchema)
+module.exports = CoursesSectionsLessons

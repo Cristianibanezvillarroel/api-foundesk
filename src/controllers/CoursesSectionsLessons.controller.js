@@ -1,8 +1,8 @@
-const CoursesSectionsItems = require('../models/CoursesSectionsItems.model')
+const CoursesSectionsLessons = require('../models/CoursesSectionsLessons.model')
 
-const getCoursesSectionsItems = async (req, res) => {
+const getCoursesSectionsLessons = async (req, res) => {
     try {
-        const resp = await CoursesSectionsItems.find()
+        const resp = await CoursesSectionsLessons.find()
             .populate({
                 path: 'coursessections',
                 populate: [
@@ -12,11 +12,11 @@ const getCoursesSectionsItems = async (req, res) => {
 
         if (!resp || resp.length === 0) {
             return res.json({
-                message: 'No CoursesSectionsItems found'
+                message: 'No CoursesSectionsLessons found'
             });
         }
         return res.json([{
-            message: 'CoursesSectionsItems',
+            message: 'CoursesSectionsLessons',
             items: resp
         }])
     } catch (error) {
@@ -29,5 +29,5 @@ const getCoursesSectionsItems = async (req, res) => {
 }
 
 module.exports = {
-    getCoursesSectionsItems
+    getCoursesSectionsLessons
 }

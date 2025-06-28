@@ -12,7 +12,7 @@ customerDiaryRouter = require('./CustomerDiary.router'),
 userRouter = require('./User.router'),
 coursesLearnItemsRouter = require('./CoursesLearnItems.router'),
 coursesSectionsRouter = require('./CoursesSections.router'),
-coursesSectionsItemsRouter = require('./CoursesSectionsItems.router'),
+coursesSectionsLessonsRouter = require('./CoursesSectionsLessons.router'),
 teacherRouter = require('./Teacher.router'),
 mercadopagoRouter = require('./MercadoPago.router'),
 userCoursesRouter = require('./UserCourses.router'),
@@ -25,7 +25,8 @@ coursesRatingsRouter = require('./CoursesRatings.router'),
 coursesQuestionsRouter = require('./CoursesQuestions.router'),
 coursesAnswersRouter = require('./CoursesAnswers.router'),
 faqRouter = require('./Faq.router'),
-itUsefulRouter = require('./ItUseful.router')
+itUsefulRouter = require('./ItUseful.router'),
+userCoursesProgressRouter = require('./UserCoursesProgress.router')
 
 router.use('/blog', blogRouter)
 router.use('/blogcategories', blogCategoriesRouter)
@@ -37,7 +38,7 @@ router.use('/coursescategoriesdetail', coursesCategoriesDetailRouter)
 router.use('/courses', coursesRouter)
 router.use('/courseslearnitems', coursesLearnItemsRouter)
 router.use('/coursessections', coursesSectionsRouter)
-router.use('/coursessectionsitems', coursesSectionsItemsRouter)
+router.use('/coursessectionslessons', coursesSectionsLessonsRouter)
 router.use('/teacher', teacherRouter)
 router.use('/customerdiary', customerDiaryRouter)
 router.use('/user', userRouter)
@@ -53,5 +54,6 @@ router.use('/coursesquestions', coursesQuestionsRouter)
 router.use('/coursesanswers', coursesAnswersRouter)
 router.use('/faq', faqRouter)
 router.use('/ituseful', itUsefulRouter)
+router.use('/usercoursesprogress', userCoursesProgressRouter)
 
 module.exports = router;
