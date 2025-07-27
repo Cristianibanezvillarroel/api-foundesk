@@ -11,9 +11,9 @@ const usercoursesprogressSchema = new mongoose.Schema({
         ref: 'Courses',
         required: true
     },
-    coursessectionsitems: {
+    coursessectionslessons: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'CoursesSectionsItems',
+        ref: 'CoursesSectionsLessons',
         required: true
     },
     status: { type: Boolean, default: true },

@@ -3,15 +3,18 @@ const router = express.Router();
 const auth = require('../middlewares/authorization');
 const {
     createProgress,
-    getProgressByCourse,
-    updateProgress
+    getProgressByUser,
+    updateProgress,
+    updateOrCreateProgress
 } = require('../controllers/UserCoursesProgress.controller');
 
 // Crear un progreso
 router.post('/create', auth, createProgress);
 // Obtener todos los progresos de un curso
-router.post('/course/', getProgressByCourse); // :courseId por body
+router.post('/user/', getProgressByUser); // :userId por body
 // Actualizar un progreso
 router.put('/update/', auth, updateProgress); // :id por body
+// Actualizar un progreso
+router.put('/updateorcreate/', auth, updateOrCreateProgress); // :campos por body
 
 module.exports = router;
