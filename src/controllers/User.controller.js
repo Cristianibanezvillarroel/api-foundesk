@@ -19,7 +19,11 @@ const bcrypt = require('bcrypt')
 }*/
 
 const postUser = async (req, res) => {
+
     try {
+
+        console.log('POST /user req.body:', req.body); // <-- Aquí revisas lo que llega
+    
         const { email, password } = req.body
         const existingUser = await User.findOne({ email })
         if (existingUser) {
@@ -27,6 +31,9 @@ const postUser = async (req, res) => {
                 message: "Usted ya tiene una cuenta de usuario activada en Foundesk. Ingrese a la plataforma en la seccion de Login."
             })
         }
+
+        console.log("estamos en la api");
+        console.log(req.body);
         const user = new User(req.body)
         user.hashPassword(password)
         await user.save()

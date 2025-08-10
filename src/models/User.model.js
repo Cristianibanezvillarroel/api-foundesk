@@ -7,7 +7,7 @@ const secret = "opciones"
 const userSchema = new mongoose.Schema({
     email: {type: String},
     name: {type: String},
-    password: {type: String},
+    password: {type: String, required: true},
     address: {type: String},
     city: {type: String},
     country: {type: String},
@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
 }, {collection: 'user'})
 
 userSchema.methods.hashPassword = function(password){
-    this.password = bcrypt.hashSync(password, 16)
+    this.password = bcrypt.hashSync(password, 10)
 }
 
 userSchema.methods.generateJWT = function(){
