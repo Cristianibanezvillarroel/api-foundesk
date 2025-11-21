@@ -1,7 +1,7 @@
 const User = require('../models/User.model')
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
-const transporter = require("../config/email")
+const transporter = require('../config/email')
 
 const postUser = async (req, res) => {
 
