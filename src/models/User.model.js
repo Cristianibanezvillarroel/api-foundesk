@@ -15,6 +15,8 @@ const userSchema = new mongoose.Schema({
     phone: {type: String},
     role: { type: String, enum: ['student', 'teacher', 'supervisor', 'admin'], required: true },
     image: {type: String},
+    resetPasswordToken: { type: String, default: null },
+    resetPasswordExpires: { type: Date, default: null },
     createdAt: {type: Date, default: Date.now},
     updatedAt: {type: Date, default: Date.now}
 }, {collection: 'user'})

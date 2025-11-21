@@ -1,22 +1,7 @@
 const User = require('../models/User.model')
 const bcrypt = require('bcrypt')
-
-/*const getUser = async (req, res) => {
-    try {
-        const resp = await User.find()
-        return res.json([{
-            message: 'User',
-            items: resp
-        }])
-
-    } catch (error) {
-        return res.json({
-            messaje: 'Error',
-            detail: error.message
-        })
-
-    }
-}*/
+const crypto = require('crypto')
+const transporter = require("../config/email")
 
 const postUser = async (req, res) => {
 
@@ -149,10 +134,114 @@ const verifyUser = async (req, res) => {
     }
 }
 
+const requestResetPassword = async (req, res) => {
+    try {
+        const { email } = req.body
+
+        const user = await User.findOne({ email })
+        if (!user) {
+            return res.json({
+                message: "Si el correo existe, enviaremos instrucciones para restablecer su contraseña."
+            })
+        }
+
+        // Generar token seguro
+        const token = crypto.randomBytes(32).toString('hex')
+
+        // Guardar token y expiración de 1 hora
+        user.resetPasswordToken = token
+        user.resetPasswordExpires = Date.now() + 3600000
+        await user.save()
+
+        // Aquí luego enviarás el correo: 
+        // ejemplo: https://app.foundesk.cl/reset-password?token=xxxx
+
+       // URL para el frontend
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password-confirm?token=${token}`;
+
+        // Enviar el correo
+        await transporter.sendMail({
+            from: `"Foundesk" <${process.env.MAIL_USER}>`,
+            to: email,
+            subject: "🔐 Recuperación de contraseña - Foundesk",
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2>Recuperación de contraseña</h2>
+                    <p>Hemos recibido una solicitud para restablecer su contraseña.</p>
+                    <p>Para continuar, haga clic en el siguiente enlace:</p>
+
+                    <a href="${resetUrl}" 
+                       style="background: #0066ff; color: white; padding: 12px 20px;
+                              text-decoration: none; border-radius: 6px; display: inline-block;">
+                        Restablecer contraseña
+                    </a>
+
+                    <p style="margin-top: 20px;">
+                        Si usted no solicitó este cambio, ignore este correo.
+                    </p>
+
+                    <p>Este enlace expirará en 1 hora.</p>
+                </div>
+            `,
+        });
+
+        return res.json({
+            message: "Revise su correo para continuar con el proceso de recuperación.",
+            detail: { token } // <--- puedes removerlo después en producción
+        })
+
+    } catch (error) {
+        return res.json({ message: "Error", detail: error.message })
+    }
+}
+
+// ---------------------------------------
+// Confirmar el reset de contraseña
+// ---------------------------------------
+const requestResetPasswordConfirm = async (req, res) => {
+    try {
+        const { token, newPassword } = req.body
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }  // token vigente
+        })
+
+        if (!user) {
+            return res.json({
+                message: "El enlace para restablecer la contraseña es inválido o ha expirado."
+            })
+        }
+
+        // Guardar nueva contraseña usando tu método
+        user.hashPassword(newPassword)
+
+        // Limpiar token para evitar reuso
+        user.resetPasswordToken = null
+        user.resetPasswordExpires = null
+
+        await user.save()
+
+        return res.json({
+            message: "Su contraseña ha sido actualizada exitosamente."
+        })
+
+    } catch (error) {
+        return res.json({
+            message: "Error",
+            detail: error.message
+        })
+    }
+}
+
+
+
 module.exports = {
     postUser,
     login,
     updateUser,
     updatePassword,
-    verifyUser
+    verifyUser,
+    requestResetPassword,
+    requestResetPasswordConfirm
 }
