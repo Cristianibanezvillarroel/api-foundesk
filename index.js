@@ -6,7 +6,7 @@ const bodyParser = require('body-parser')
 //const { readFile } = require('./fileSystem')
 //const { readData, readDataCategories, readDataBlogs, readDataCustomerTestimonials, readDataTemplates } = require('./functions')
 require('dotenv').config()
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 const cors = require('cors')
 
 const corsOptions = {
