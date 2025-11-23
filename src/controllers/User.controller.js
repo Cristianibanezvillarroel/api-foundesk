@@ -135,11 +135,14 @@ const verifyUser = async (req, res) => {
 }
 
 const requestResetPassword = async (req, res) => {
+    console.log("====[RESET PASSWORD REQUEST]====");
     try {
         const { email } = req.body
-
+        console.log(`[1] Email recibido desde frontend: ${email}`);
         const user = await User.findOne({ email })
+        console.log(`[2] ¿Usuario encontrado?: ${!!user}`);
         if (!user) {
+            console.log("[2.1] Usuario NO existe — pero enviamos respuesta genérica.");
             return res.json({
                 message: "Si el correo existe, enviaremos instrucciones para restablecer su contraseña."
             })
@@ -147,20 +150,29 @@ const requestResetPassword = async (req, res) => {
 
         // Generar token seguro
         const token = crypto.randomBytes(32).toString('hex')
-
+        console.log(`[3] Token generado: ${token}`);
         // Guardar token y expiración de 1 hora
         user.resetPasswordToken = token
         user.resetPasswordExpires = Date.now() + 3600000
         await user.save()
+        console.log("[4] Token guardado en BD correctamente.");
 
         // Aquí luego enviarás el correo: 
         // ejemplo: https://app.foundesk.cl/reset-password?token=xxxx
 
        // URL para el frontend
-        const resetUrl = `${process.env.FRONTEND_URL}/reset-password-confirm?token=${token}`;
+        const resetUrl = `${process.env.FRONTEND_URL}/#/reset-password-confirm?token=${token}`;
+        console.log(`[5] URL generada para reset: ${resetUrl}`);
+
+        // Mostrar configuración SMTP
+        console.log("---- SMTP CONFIG ----");
+        console.log(`MAIL_USER: ${process.env.MAIL_USER}`);
+        console.log(`MAIL_PASS (primeros 3 chars): ${process.env.MAIL_PASS?.substring(0,3)}***`);
+        console.log("----------------------");
 
         // Enviar el correo
-        await transporter.sendMail({
+        console.log("[6] Intentando enviar el correo...");
+        const mailResult = await transporter.sendMail({
             from: `"Foundesk" <${process.env.MAIL_USER}>`,
             to: email,
             subject: "🔐 Recuperación de contraseña - Foundesk",
@@ -185,12 +197,21 @@ const requestResetPassword = async (req, res) => {
             `,
         });
 
+        console.log("[7] Resultado de sendMail:");
+        console.log(mailResult);
+
+        console.log("====[RESET PASSWORD COMPLETADO OK]====");
+
         return res.json({
             message: "Revise su correo para continuar con el proceso de recuperación.",
             detail: { token } // <--- puedes removerlo después en producción
         })
 
     } catch (error) {
+        console.error("====[ERROR EN RESET PASSWORD]====");
+        console.error(error);
+        console.error("=================================");
+
         return res.json({ message: "Error", detail: error.message })
     }
 }
