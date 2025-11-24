@@ -7,8 +7,6 @@ const postUser = async (req, res) => {
 
     try {
 
-        console.log('POST /user req.body:', req.body); // <-- Aquí revisas lo que llega
-    
         const { email, password } = req.body
         const existingUser = await User.findOne({ email })
         if (existingUser) {
@@ -17,16 +15,57 @@ const postUser = async (req, res) => {
             })
         }
 
-        console.log("estamos en la api");
-        console.log(req.body);
         const user = new User(req.body)
         user.hashPassword(password)
+
+        // Generar token seguro
+        const token = crypto.randomBytes(32).toString('hex')
+        // Guardar token y expiración de 1 hora
+        user.resetPasswordToken = token
+        user.resetPasswordExpires = Date.now() + 3600000
+
         await user.save()
+
+        const pin = await confirmUser(user)
+
+        // URL para el frontend
+
+        // Enviar el correo
+        const mailResult = await transporter.sendMail({
+            from: `"Foundesk" <${process.env.MAIL_USER}>`,
+            to: email,
+            subject: "🔐 Confirmación de cuenta - Foundesk",
+            html: `
+            <div style="font-family: Arial; padding: 24px; color: #333;">
+                <h2>Bienvenido a Foundesk</h2>
+                <p>Tu PIN de confirmación es:</p>
+
+                <div style="font-size: 28px; font-weight: bold; letter-spacing: 4px;
+                            padding: 12px; background: #f4f4f4; width: fit-content;
+                            border-radius: 6px; margin-bottom: 20px;">
+                    ${pin}
+                </div>
+
+                <p>Ingresa este PIN en el siguiente enlace:</p>
+
+                <a href="${process.env.FRONTEND_URL}/#/confirm?token=${token}"
+                    style="background: #0066ff; color: #fff; padding: 14px 24px;
+                            text-decoration: none; border-radius: 8px;">
+                    Confirmar cuenta
+                </a>
+
+                <p style="margin-top: 20px; font-size: 14px; color: #777;">
+                    Este enlace y PIN expirarán en 1 hora.<br>
+                    Si no creaste una cuenta, ignora este correo.
+                </p>
+            </div>
+            `,
+        });
 
         const userFind = await User.findOne({ email })
         return res.json({
-            message: "Su cuenta se ha creado exitosamente. Ingrese a la plataforma en la seccion de Login.",
-            detail: { user: userFind, token: userFind.generateJWT() }
+            message: "Su cuenta se ha creado exitosamente. Revise su correo para confirmar la cuenta.",
+            detail: { user: userFind, token: userFind.generateJWT(), pin }
         })
     } catch (error) {
         return res.json({
@@ -135,14 +174,10 @@ const verifyUser = async (req, res) => {
 }
 
 const requestResetPassword = async (req, res) => {
-    console.log("====[RESET PASSWORD REQUEST]====");
     try {
         const { email } = req.body
-        console.log(`[1] Email recibido desde frontend: ${email}`);
         const user = await User.findOne({ email })
-        console.log(`[2] ¿Usuario encontrado?: ${!!user}`);
         if (!user) {
-            console.log("[2.1] Usuario NO existe — pero enviamos respuesta genérica.");
             return res.json({
                 message: "Si el correo existe, enviaremos instrucciones para restablecer su contraseña."
             })
@@ -150,28 +185,18 @@ const requestResetPassword = async (req, res) => {
 
         // Generar token seguro
         const token = crypto.randomBytes(32).toString('hex')
-        console.log(`[3] Token generado: ${token}`);
         // Guardar token y expiración de 1 hora
         user.resetPasswordToken = token
         user.resetPasswordExpires = Date.now() + 3600000
         await user.save()
-        console.log("[4] Token guardado en BD correctamente.");
 
         // Aquí luego enviarás el correo: 
         // ejemplo: https://app.foundesk.cl/reset-password?token=xxxx
 
-       // URL para el frontend
+        // URL para el frontend
         const resetUrl = `${process.env.FRONTEND_URL}/#/reset-password-confirm?token=${token}`;
-        console.log(`[5] URL generada para reset: ${resetUrl}`);
-
-        // Mostrar configuración SMTP
-        console.log("---- SMTP CONFIG ----");
-        console.log(`MAIL_USER: ${process.env.MAIL_USER}`);
-        console.log(`MAIL_PASS (primeros 3 chars): ${process.env.MAIL_PASS?.substring(0,3)}***`);
-        console.log("----------------------");
 
         // Enviar el correo
-        console.log("[6] Intentando enviar el correo...");
         const mailResult = await transporter.sendMail({
             from: `"Foundesk" <${process.env.MAIL_USER}>`,
             to: email,
@@ -197,21 +222,12 @@ const requestResetPassword = async (req, res) => {
             `,
         });
 
-        console.log("[7] Resultado de sendMail:");
-        console.log(mailResult);
-
-        console.log("====[RESET PASSWORD COMPLETADO OK]====");
-
         return res.json({
             message: "Revise su correo para continuar con el proceso de recuperación.",
             detail: { token } // <--- puedes removerlo después en producción
         })
 
     } catch (error) {
-        console.error("====[ERROR EN RESET PASSWORD]====");
-        console.error(error);
-        console.error("=================================");
-
         return res.json({ message: "Error", detail: error.message })
     }
 }
@@ -235,15 +251,12 @@ const requestResetPasswordConfirm = async (req, res) => {
         }
         // Guardar nueva contraseña usando tu método
         user.hashPassword(newPassword)
-        console.log(`[4] Hash hacia newPassword: ${newPassword}`);
 
         // Limpiar token para evitar reuso
         user.resetPasswordToken = null
         user.resetPasswordExpires = null
 
         await user.save()
-         console.log(`[5] logra ejecutar user.save() correctamente`);
-
         return res.json({
             message: "Su contraseña ha sido actualizada exitosamente."
         })
@@ -256,6 +269,43 @@ const requestResetPasswordConfirm = async (req, res) => {
     }
 }
 
+const confirmUser = async (user) => {
+    const pin = Math.floor(100000 + Math.random() * 900000).toString()
+    user.confirmUserPin = pin
+    user.confirmUserExpires = Date.now() + 3600 * 1000 // 1 hora
+    await user.save()
+    return pin
+}
+
+const confirmUserPin = async (req, res) => {
+    try {
+        const { email, pin } = req.body
+        if (!email || !pin) {
+            return res.status(400).json({ message: 'Faltan email o pin' })
+        }
+        const user = await User.findOne({
+            email,
+            confirmUserPin: pin,
+            confirmUserExpires: { $gt: Date.now() }
+        })
+
+        if (!user) {
+            return res.status(400).json({ message: 'Pin inválido o expirado' })
+        }
+
+        // marcar usuario como confirmado (opcional: agregar campo confirmed)
+        user.confirmUserPin = null
+        user.confirmUserExpires = null
+        user.role = user.role || 'student' // ya definido
+        // si quieres un flag:
+        user.isConfirmed = true
+        await user.save()
+
+        return res.json({ message: 'Cuenta confirmada correctamente' })
+    } catch (err) {
+        return res.status(500).json({ message: 'Error', detail: err.message })
+    }
+}
 
 
 module.exports = {
@@ -265,5 +315,7 @@ module.exports = {
     updatePassword,
     verifyUser,
     requestResetPassword,
-    requestResetPasswordConfirm
+    requestResetPasswordConfirm,
+    confirmUser,
+    confirmUserPin
 }
