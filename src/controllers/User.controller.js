@@ -220,9 +220,11 @@ const requestResetPassword = async (req, res) => {
 // Confirmar el reset de contraseña
 // ---------------------------------------
 const requestResetPasswordConfirm = async (req, res) => {
+    console.log(`-------------[RESET PASSWORD CONFIRM]----------------`);
     try {
         const { token, newPassword } = req.body
-
+        console.log(`[1] Token recibido desde frontend: ${token}`);
+        console.log(`[2] Nueva Password recibida desde frontend: ${newPassword}`);
         const user = await User.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() }  // token vigente
@@ -233,21 +235,26 @@ const requestResetPasswordConfirm = async (req, res) => {
                 message: "El enlace para restablecer la contraseña es inválido o ha expirado."
             })
         }
-
+        console.log(`[3] Mensaje creado por api: ${message}`);
         // Guardar nueva contraseña usando tu método
         user.hashPassword(newPassword)
+        console.log(`[4] Hash hacia newPassword: ${newPassword}`);
 
         // Limpiar token para evitar reuso
         user.resetPasswordToken = null
         user.resetPasswordExpires = null
 
         await user.save()
+         console.log(`[5] logra ejecutar user.save() correctamente`);
 
         return res.json({
             message: "Su contraseña ha sido actualizada exitosamente."
         })
 
     } catch (error) {
+        console.error("====[ERROR EN RESET PASSWORD CONFIRM]====");
+        console.error(error);
+        console.error("=================================");
         return res.json({
             message: "Error",
             detail: error.message
