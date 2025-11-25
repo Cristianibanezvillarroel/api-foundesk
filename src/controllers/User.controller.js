@@ -21,8 +21,8 @@ const postUser = async (req, res) => {
         // Generar token seguro
         const token = crypto.randomBytes(32).toString('hex')
         // Guardar token y expiración de 1 hora
-        user.resetPasswordToken = token
-        user.resetPasswordExpires = Date.now() + 3600000
+        user.confirmUserToken = token
+        user.confirmUserExpires = Date.now() + 3600000
 
         await user.save()
 
@@ -64,8 +64,8 @@ const postUser = async (req, res) => {
 
         const userFind = await User.findOne({ email })
         return res.json({
-            message: "Su cuenta se ha creado exitosamente. Revise su correo para confirmar la cuenta.",
-            detail: { user: userFind, token: userFind.generateJWT(), pin }
+            message: "Su cuenta se ha creado exitosamente. Revise su correo para continuar con la confirmación de su cuenta."
+            //detail: { user: userFind, token: userFind.generateJWT(), pin }
         })
     } catch (error) {
         return res.json({
@@ -279,29 +279,30 @@ const confirmUser = async (user) => {
 
 const confirmUserPin = async (req, res) => {
     try {
-        const { email, pin } = req.body
-        if (!email || !pin) {
-            return res.status(400).json({ message: 'Faltan email o pin' })
+        const { token, pin } = req.body
+        if (!token || !pin) {
+            return res.status(400).json({ message: 'Faltan token o pin' })
         }
         const user = await User.findOne({
-            email,
+            resetPasswordToken: token,
             confirmUserPin: pin,
             confirmUserExpires: { $gt: Date.now() }
         })
 
         if (!user) {
-            return res.status(400).json({ message: 'Pin inválido o expirado' })
+            return res.status(400).json({ message: 'Pin o token inválido o expirado' })
         }
 
         // marcar usuario como confirmado (opcional: agregar campo confirmed)
         user.confirmUserPin = null
+        user.confirmUserToken = null
         user.confirmUserExpires = null
         user.role = user.role || 'student' // ya definido
         // si quieres un flag:
         user.isConfirmed = true
         await user.save()
 
-        return res.json({ message: 'Cuenta confirmada correctamente' })
+        return res.json({ message: 'Cuenta confirmada correctamente. Ahora ya puede acceder a Foundesk. Haga clic en Ingresar de la parte superior y comience a disfrutar de su aprendizaje con Foundesk.' })
     } catch (err) {
         return res.status(500).json({ message: 'Error', detail: err.message })
     }

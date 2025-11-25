@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
     image: {type: String},
     resetPasswordToken: { type: String, default: null },
     resetPasswordExpires: { type: Date, default: null },
+    confirmUserToken: { type: String, default: null },
     confirmUserPin: { type: String, default: null },
     confirmUserExpires: { type: Date, default: null },
     isConfirmed: { type: Boolean, default: false },
