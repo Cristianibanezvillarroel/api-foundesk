@@ -303,7 +303,11 @@ const confirmUserPin = async (req, res) => {
         user.isConfirmed = true
         await user.save()
 
-        return res.json({ message: 'Cuenta confirmada correctamente. Ahora ya puede acceder a Foundesk. Haga clic en Ingresar de la parte superior y comience a disfrutar de su aprendizaje con Foundesk.' })
+        return res.json({
+            message: 'Cuenta confirmada correctamente. Ahora ya puede acceder a Foundesk. Será redirigido en 5 segundos para comenzar a disfrutar de su aprendizaje con Foundesk.',
+            detail: { user: user, token: user.generateJWT() }
+        })
+
     } catch (err) {
         return res.status(500).json({ message: 'Error', detail: err.message })
     }
