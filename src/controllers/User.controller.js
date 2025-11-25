@@ -258,8 +258,37 @@ const requestResetPasswordConfirm = async (req, res) => {
         user.resetPasswordExpires = null
 
         await user.save()
+
+        const resetUrl = `${process.env.FRONTEND_URL}/#/login`;
+
+        // Enviar el correo
+        const mailResult = await transporter.sendMail({
+            from: `"Foundesk" <${process.env.MAIL_USER}>`,
+            to: user.email,
+            subject: "🔐 Cambio de contraseña exitoso - Foundesk",
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2>Confirmación de cambio de contraseña</h2>
+                    <p>Hemos recibido una solicitud para modificar su contraseña.</p>
+                    <p>Y su contraseña ha sido modificada exitosamente. Para ingresar a Foundesk, haga clic en el siguiente enlace:</p>
+
+                    <a href="${resetUrl}" 
+                       style="background: #0066ff; color: white; padding: 12px 20px;
+                              text-decoration: none; border-radius: 6px; display: inline-block;">
+                        Ingresar a Foundesk
+                    </a>
+
+                    <p style="margin-top: 20px;">
+                        Si usted no solicitó esta modificación, ignore este correo.
+                    </p>
+
+                    <p>Este enlace expirará en 1 hora.</p>
+                </div>
+            `,
+        });
+
         return res.json({
-            message: "Su contraseña ha sido actualizada exitosamente."
+            message: "Su contraseña ha sido actualizada exitosamente. Le hemos enviado un correo de notificación de este cambio realizado."
         })
 
     } catch (error) {
