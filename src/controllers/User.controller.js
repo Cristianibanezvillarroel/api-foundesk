@@ -64,7 +64,8 @@ const postUser = async (req, res) => {
 
         const userFind = await User.findOne({ email })
         return res.json({
-            message: "Su cuenta se ha creado exitosamente. Revise su correo para continuar con la confirmación de su cuenta."
+            message: "Su cuenta se ha creado exitosamente. Revise su correo para continuar con la confirmación de su cuenta.",
+            detail: { pin: pin }
             //detail: { user: userFind, token: userFind.generateJWT(), pin }
         })
     } catch (error) {
@@ -284,7 +285,7 @@ const confirmUserPin = async (req, res) => {
             return res.status(400).json({ message: 'Faltan token o pin' })
         }
         const user = await User.findOne({
-            resetPasswordToken: token,
+            confirmUserToken: token,
             confirmUserPin: pin,
             confirmUserExpires: { $gt: Date.now() }
         })
