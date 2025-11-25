@@ -89,7 +89,7 @@ const login = async (req, res) => {
         // Nuevo: verificar que la cuenta esté confirmada
         if (!userFind.isConfirmed) {
             return res.json({
-                message: "Cuenta no confirmada. Revise su correo para confirmar su cuenta."
+                message: "Cuenta no confirmada"
             })
         }
 
