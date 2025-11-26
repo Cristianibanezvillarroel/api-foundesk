@@ -149,7 +149,7 @@ const updatePassword = async (req, res) => {
         const isCorrectPassword = bcrypt.compareSync(password, userFind.password)
         if (!isCorrectPassword) {
             return res.json({
-                message: "error de password"
+                message: "error: la contraseña actual ingresada no es correcta."
             })
         }
 
