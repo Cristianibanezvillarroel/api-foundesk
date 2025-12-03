@@ -26,7 +26,8 @@ coursesQuestionsRouter = require('./CoursesQuestions.router'),
 coursesAnswersRouter = require('./CoursesAnswers.router'),
 faqRouter = require('./Faq.router'),
 itUsefulRouter = require('./ItUseful.router'),
-userCoursesProgressRouter = require('./UserCoursesProgress.router')
+userCoursesProgressRouter = require('./UserCoursesProgress.router'),
+teacherRequestRouter = require('./TeacherRequest.router');
 
 router.use('/blog', blogRouter)
 router.use('/blogcategories', blogCategoriesRouter)
@@ -55,5 +56,7 @@ router.use('/coursesanswers', coursesAnswersRouter)
 router.use('/faq', faqRouter)
 router.use('/ituseful', itUsefulRouter)
 router.use('/usercoursesprogress', userCoursesProgressRouter)
+router.use('/teacherrequest', teacherRequestRouter)
+
 
 module.exports = router;
