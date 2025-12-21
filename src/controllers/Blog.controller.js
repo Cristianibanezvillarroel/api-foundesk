@@ -8,8 +8,6 @@ const getBlog = async (req, res) => {
             items: resp
         }])
 
-        const dataBlogs = readDataBlogs()
-        res.json(dataBlogs.Blogs)
     } catch (error) {
         return res.json({
             messaje: 'Error',

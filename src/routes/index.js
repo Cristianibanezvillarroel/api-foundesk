@@ -21,14 +21,18 @@ teacherAnnouncementsRouter = require('./TeacherAnnouncements.router'),
 customerCommentsRouter = require('./CustomerComments.router'),
 teacherCommentsRouter = require('./TeacherComments.router'),
 coursesDownloadableRouter = require('./CoursesDownloadable.router'),
+coursesVideosRouter = require('./CoursesVideos.router'),
+coursesFaqRouter = require('./CoursesFaq.router'),
 coursesRatingsRouter = require('./CoursesRatings.router'),
 coursesQuestionsRouter = require('./CoursesQuestions.router'),
 coursesAnswersRouter = require('./CoursesAnswers.router'),
 faqRouter = require('./Faq.router'),
 itUsefulRouter = require('./ItUseful.router'),
 userCoursesProgressRouter = require('./UserCoursesProgress.router'),
-teacherRequestRouter = require('./TeacherRequest.router');
+messagesRouter = require('./Messages.router');
+coursesStatisticsRouter = require('./CoursesStatistics.router');
 
+// Definir las rutas y sus controladores
 router.use('/blog', blogRouter)
 router.use('/blogcategories', blogCategoriesRouter)
 router.use('/customertestimonials', customerTestimonialsRouter)
@@ -50,13 +54,16 @@ router.use('/teacherannouncements', teacherAnnouncementsRouter)
 router.use('/customercomments', customerCommentsRouter)
 router.use('/teachercomments', teacherCommentsRouter)
 router.use('/coursesdownloadable', coursesDownloadableRouter)
+router.use('/coursesvideos', coursesVideosRouter)
+router.use('/coursesfaq', coursesFaqRouter);
 router.use('/coursesratings', coursesRatingsRouter)
 router.use('/coursesquestions', coursesQuestionsRouter)
 router.use('/coursesanswers', coursesAnswersRouter)
 router.use('/faq', faqRouter)
 router.use('/ituseful', itUsefulRouter)
 router.use('/usercoursesprogress', userCoursesProgressRouter)
-router.use('/teacherrequest', teacherRequestRouter)
+router.use('/messages', messagesRouter);
+router.use('/coursesstatistics', coursesStatisticsRouter);
 
 
 module.exports = router;

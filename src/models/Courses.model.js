@@ -8,7 +8,7 @@ const coursesSchema = new mongoose.Schema({
         required: true
     },
     title: {type: String},
-    author: {type: String},
+    slug: {type: String},
     price: {type: Number},
     description: {type: String},
     descriptionAdd: {type: String},
@@ -17,7 +17,9 @@ const coursesSchema = new mongoose.Schema({
         ref: 'Teacher',
         required: true
     },
-    image: {type: String}
+    imagecourse: {type: String},
+    prerequisites: {type: String},
+    targetaudience: {type: String}
 }, {collection: 'courses'})
 
 const Courses = mongoose.model('Courses', coursesSchema)

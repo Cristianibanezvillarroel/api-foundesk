@@ -1,4 +1,4 @@
-module.exports = {
+/*module.exports = {
   apps: [
     {
       name: "api-foundesk",
@@ -15,4 +15,4 @@ module.exports = {
       }
     }
   ]
-}
+}*/

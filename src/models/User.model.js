@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-//const secret = process.env.SECRET_JWT
 const secret = "opciones"
 
 const userSchema = new mongoose.Schema({
@@ -13,7 +12,12 @@ const userSchema = new mongoose.Schema({
     country: {type: String},
     lastname: {type: String},
     phone: {type: String},
-    role: { type: String, enum: ['student', 'teacher', 'supervisor', 'admin'], required: true },
+    role: { 
+        type: [String], 
+        enum: ['student', 'instructor', 'entrepreneur', 'admin', 'superadmin'],
+        default: ['student'], 
+        required: true
+    },
     image: {type: String},
     resetPasswordToken: { type: String, default: null },
     resetPasswordExpires: { type: Date, default: null },

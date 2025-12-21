@@ -6,7 +6,6 @@ const teacherSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    name: { type: String },
     career: { type: String },
     careerinstitution: { type: String },
     postgraduate: { type: String },
@@ -19,7 +18,6 @@ const teacherSchema = new mongoose.Schema({
     students: { type: Number },
     courses: { type: Number },
     review: { type: String },
-    image: { type: String },
     isConfirmed: { type: Boolean, default: false },
     courseName: { type: String },
     categorie: {
@@ -28,8 +26,11 @@ const teacherSchema = new mongoose.Schema({
         required: true
     },
     descriptionCourse: { type: String },
+    newCategory: { type: String },
     motives: { type: String },
     expectations: { type: String },
+    cv: { type: String },
+    photo: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 }, { collection: 'teacher' })

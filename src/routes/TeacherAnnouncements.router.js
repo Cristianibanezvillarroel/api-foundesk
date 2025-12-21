@@ -9,9 +9,9 @@ const {
 const auth = require('../middlewares/authorization');
 
 // Crear un anuncio
-router.post('/create', createAnnouncement);
+router.post('/create', auth, createAnnouncement);
 // Obtener anuncios de un curso
-router.post('/course', getAnnouncementsByCourse);
+router.get('/course/:courseId', getAnnouncementsByCourse);
 // Actualizar un anuncio
 router.put('/update/:id', auth, updateAnnouncement);
 // Eliminar un anuncio

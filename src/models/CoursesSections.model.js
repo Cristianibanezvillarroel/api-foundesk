@@ -6,7 +6,10 @@ const coursessectionsSchema = new mongoose.Schema({
         ref: 'Courses',
         required: true
     },
-    name: {type: String}
+    name: {type: String},
+    description: {type: String},
+    createdAt: {type: Date, default: Date.now},
+    updatedAt: {type: Date, default: Date.now}
 }, {collection: 'coursessections'})
 
 const CoursesSections = mongoose.model('CoursesSections', coursessectionsSchema)

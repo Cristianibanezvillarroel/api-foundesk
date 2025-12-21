@@ -1,7 +1,17 @@
 const express = require('express'),
 router = express.Router(),
-{ getTeacher } = require('../controllers/Teacher.controller')
+{ getTeacher, getTeacherByUser, getTeacherById, teacherRequest, uploadTeacherFiles, updateTeacherTimes, updateTeacherConfirm, teacherCourses, downloadTeacherFile } = require('../controllers/Teacher.controller'),
+auth = require('../middlewares/authorization'),
+fileUploadProcessor = require('../middlewares/fileUploadProcessor');
 
 router.get('/', getTeacher)
+router.get('/teacher/:userId', getTeacherByUser)
+router.get('/:id', getTeacherById)
+router.post('/create', auth, teacherRequest)
+router.post('/upload-teacher-files', auth, fileUploadProcessor, uploadTeacherFiles)
+router.get('/files/:fileType', auth, downloadTeacherFile)
+router.patch('/update-teacher-times/:teacherId', auth, updateTeacherTimes)
+router.patch('/update-teacher-confirm/:teacherId', auth, updateTeacherConfirm)
+router.get('/courses/:teacherId', auth, teacherCourses)
 
 module.exports = router

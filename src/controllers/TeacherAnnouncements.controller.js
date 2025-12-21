@@ -14,13 +14,14 @@ const createAnnouncement = async (req, res) => {
 // Obtener todos los anuncios de un curso
 const getAnnouncementsByCourse = async (req, res) => {
     try {
-        const { courseId } = req.body;
+        const { courseId } = req.params;
         const announcements = await TeacherAnnouncements.find({ courses: courseId })
             .populate({
                 path: 'courses',
                 populate: { path: 'teacher' }
-            });
-        res.json({ message: 'Anuncios encontrados', announcements });
+            })
+            .sort({ createdAt: -1 });
+        res.json({ message: 'Anuncios encontrados', items: announcements });
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener anuncios', detail: error.message });
     }
@@ -29,24 +30,29 @@ const getAnnouncementsByCourse = async (req, res) => {
 // Actualizar un anuncio
 const updateAnnouncement = async (req, res) => {
     try {
-        const { title, description, teacher } = req.body;
+        const { title, description, courses } = req.body;
         const { id } = req.params;
+        
         const announcement = await TeacherAnnouncements.findById(id).populate({
             path: 'courses',
             populate: { path: 'teacher' }
         });
+        
         if (!announcement) {
             return res.status(404).json({ message: 'Anuncio no encontrado' });
         }
-        // Validar que el teacher enviado coincida con el teacher del curso asociado
-        if (!announcement.courses || String(announcement.courses.teacher) !== String(teacher)) {
+        
+        // Validar que el curso enviado coincida con el curso del anuncio
+        if (String(announcement.courses._id) !== String(courses)) {
             return res.status(403).json({ message: 'No autorizado para actualizar este anuncio' });
         }
+        
         const updated = await TeacherAnnouncements.findByIdAndUpdate(
             id,
             { title, description, updatedAt: Date.now() },
             { new: true }
         );
+        
         res.json({ message: 'Anuncio actualizado', updated });
     } catch (error) {
         res.status(500).json({ message: 'Error al actualizar el anuncio', detail: error.message });
@@ -57,17 +63,22 @@ const updateAnnouncement = async (req, res) => {
 const deleteAnnouncement = async (req, res) => {
     try {
         const { id } = req.params;
-        const { teacher } = req.body;
+        const { courses } = req.body;
+        
         const announcement = await TeacherAnnouncements.findById(id).populate({
             path: 'courses',
             populate: { path: 'teacher' }
         });
+        
         if (!announcement) {
             return res.status(404).json({ message: 'Anuncio no encontrado' });
         }
-        if (!announcement.courses || String(announcement.courses.teacher) !== String(teacher)) {
+        
+        // Validar que el curso enviado coincida con el curso del anuncio
+        if (String(announcement.courses._id) !== String(courses)) {
             return res.status(403).json({ message: 'No autorizado para eliminar este anuncio' });
         }
+        
         await TeacherAnnouncements.findByIdAndDelete(id);
         res.json({ message: 'Anuncio eliminado' });
     } catch (error) {

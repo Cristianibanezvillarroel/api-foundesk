@@ -6,7 +6,11 @@ const coursesdownloadableSchema = new mongoose.Schema({
         ref: 'Courses',
         required: true
     },
-    categorie: {type: String},
+    coursesSectionsLessons: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CoursesSectionsLessons',
+        default: null
+    },
     title: {type: String},
     description: {type: String},
     route: {type: String},
