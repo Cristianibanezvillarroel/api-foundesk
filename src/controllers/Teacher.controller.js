@@ -119,8 +119,8 @@ const teacherRequest = async (req, res) => {
     if (!userDoc) {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
-    // Buscar por user correctamente
-    const teacher = await Teacher.findOne({ user })
+    // Buscar por teacher correctamente
+    let teacher = await Teacher.findOne({ user })
       .populate([
         { path: 'categorie' },
         { path: 'user' }
@@ -144,7 +144,7 @@ const teacherRequest = async (req, res) => {
 
     if (!teacher) {
       // Crear nuevo documento teacher con la solicitud
-      teacher = new Teacher({
+      let teacher = new Teacher({
         user,
         isConfirmed: false,
         courseName,

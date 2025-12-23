@@ -48,7 +48,7 @@ const postUser = async (req, res) => {
 
                 <p>Ingresa este PIN en el siguiente enlace:</p>
 
-                <a href="${process.env.FRONTEND_URL}/#/confirm?token=${token}"
+                <a href="${process.env.FRONTEND_URL}/confirm?token=${token}"
                     style="background: #0066ff; color: #fff; padding: 14px 24px;
                             text-decoration: none; border-radius: 8px;">
                     Confirmar cuenta
@@ -203,7 +203,7 @@ const requestResetPassword = async (req, res) => {
         // ejemplo: https://app.foundesk.cl/reset-password?token=xxxx
 
         // URL para el frontend
-        const resetUrl = `${process.env.FRONTEND_URL}/#/reset-password-confirm?token=${token}`;
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password-confirm?token=${token}`;
 
         // Enviar el correo
         const mailResult = await transporter.sendMail({
@@ -267,7 +267,7 @@ const requestResetPasswordConfirm = async (req, res) => {
 
         await user.save()
 
-        const resetUrl = `${process.env.FRONTEND_URL}/#/login`;
+        const resetUrl = `${process.env.FRONTEND_URL}/login`;
 
         // Enviar el correo
         const mailResult = await transporter.sendMail({
