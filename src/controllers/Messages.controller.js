@@ -97,6 +97,9 @@ const getMessagesById = async (req, res) => {
  * Body esperado: { subject, body, userFrom, userTo, course?, parentMessageId?, status?, department?, date? }
  */
 const createMessage = async (req, res) => {
+
+    const user = req.user;
+
     try {
         const {
             subject,
@@ -142,7 +145,8 @@ const createMessage = async (req, res) => {
 
         return res.status(201).json({
             message: 'Message created',
-            detail: populated
+            detail: populated,
+            user: user
         })
     } catch (error) {
         console.error('createMessage error', error)

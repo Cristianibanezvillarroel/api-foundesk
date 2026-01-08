@@ -31,6 +31,36 @@ const teacherSchema = new mongoose.Schema({
     expectations: { type: String },
     cv: { type: String },
     photo: { type: String },
+    // Datos del contrato
+    contract: {
+        // Fecha del contrato
+        contractDate: { 
+            day: { type: Number },
+            month: { type: String },
+            year: { type: Number }
+        },
+        // Datos de Foundesk
+        foundeskRut: { type: String },
+        foundeskRepresentative: { type: String },
+        foundeskAddress: { type: String },
+        // Datos del Instructor
+        instructorFullName: { type: String },
+        instructorRut: { type: String },
+        instructorAddress: { type: String },
+        // Términos económicos
+        commissionPercentage: { type: Number }, // Porcentaje comisión venta individual
+        poolCommissionPercentage: { type: Number }, // Porcentaje comisión pool
+        settlementDays: { type: Number }, // Días para liquidación mensual
+        // Términos de terminación
+        terminationNoticeDays: { type: Number }, // Días de preaviso para término
+        // Control
+        isContractFilled: { type: Boolean, default: false },
+        filledBy: { 
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'User' 
+        },
+        filledAt: { type: Date }
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 }, { collection: 'teacher' })

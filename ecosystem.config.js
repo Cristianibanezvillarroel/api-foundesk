@@ -11,7 +11,9 @@ module.exports = {
         MAIL_USER: "cristian.ibanez@foundesk.cl",
         MAIL_PASS: "caiv2409%C",
         FRONTEND_URL: "https://sistema.foundesk.cl",
-        SECRET_JWT: "opciones"
+        SECRET_JWT: "opciones",
+        LEGAL_STORAGE_PATH: "/var/www/foundesk/legal",
+        UPLOADS_BASE_PATH: "/var/www/foundesk/uploads"
       }
     }
   ]

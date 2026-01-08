@@ -476,6 +476,118 @@ const downloadTeacherFile = async (req, res) => {
   }
 }
 
+// Actualizar datos del contrato de un teacher (admin/superadmin)
+const updateTeacherContract = async (req, res) => {
+  try {
+    const { teacherId } = req.params
+    const adminUser = req.user // Usuario administrador que realiza el cambio
+
+    // Verificar que el usuario sea admin o superadmin
+    if (!adminUser || (adminUser.role !== 'admin' && adminUser.role !== 'superadmin')) {
+      return res.status(403).json({
+        message: 'No tienes permisos para actualizar contratos'
+      })
+    }
+
+    const {
+      contractDate,
+      foundeskRut,
+      foundeskRepresentative,
+      foundeskAddress,
+      instructorFullName,
+      instructorRut,
+      instructorAddress,
+      commissionPercentage,
+      poolCommissionPercentage,
+      settlementDays,
+      terminationNoticeDays
+    } = req.body
+
+    // Validaciones básicas
+    if (!teacherId) {
+      return res.status(400).json({ message: 'Se requiere ID del teacher' })
+    }
+
+    const teacher = await Teacher.findById(teacherId)
+    if (!teacher) {
+      return res.status(404).json({ message: 'Teacher no encontrado' })
+    }
+
+    // Actualizar datos del contrato
+    teacher.contract = {
+      contractDate,
+      foundeskRut,
+      foundeskRepresentative,
+      foundeskAddress,
+      instructorFullName,
+      instructorRut,
+      instructorAddress,
+      commissionPercentage,
+      poolCommissionPercentage,
+      settlementDays,
+      terminationNoticeDays,
+      isContractFilled: true,
+      filledBy: adminUser._id,
+      filledAt: new Date()
+    }
+    teacher.updatedAt = new Date()
+
+    await teacher.save()
+
+    const updatedTeacher = await Teacher.findById(teacherId)
+      .populate([
+        { path: 'categorie' },
+        { path: 'user' },
+        { path: 'contract.filledBy', select: 'name lastname email' }
+      ])
+
+    return res.json({
+      message: 'Contrato actualizado exitosamente',
+      detail: updatedTeacher
+    })
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Error al actualizar contrato',
+      detail: error.message
+    })
+  }
+}
+
+// Obtener datos del contrato de un teacher
+const getTeacherContract = async (req, res) => {
+  try {
+    const { teacherId } = req.params
+
+    if (!teacherId) {
+      return res.status(400).json({ message: 'Se requiere ID del teacher' })
+    }
+
+    const teacher = await Teacher.findById(teacherId)
+      .populate([
+        { path: 'user', select: 'name lastname email' },
+        { path: 'contract.filledBy', select: 'name lastname email' }
+      ])
+
+    if (!teacher) {
+      return res.status(404).json({ message: 'Teacher no encontrado' })
+    }
+
+    return res.json({
+      message: 'Datos del contrato obtenidos',
+      detail: {
+        teacherId: teacher._id,
+        teacherName: teacher.user ? `${teacher.user.name} ${teacher.user.lastname}` : '',
+        contract: teacher.contract || null
+      }
+    })
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Error al obtener datos del contrato',
+      detail: error.message
+    })
+  }
+}
+
 module.exports = {
   getTeacher,
   getTeacherByUser,
@@ -485,5 +597,7 @@ module.exports = {
   updateTeacherTimes,
   updateTeacherConfirm,
   teacherCourses,
-  downloadTeacherFile
+  downloadTeacherFile,
+  updateTeacherContract,
+  getTeacherContract
 }

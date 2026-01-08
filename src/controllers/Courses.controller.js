@@ -219,13 +219,17 @@ const downloadCourseFile = async (req, res) => {
         const filePath = course.imagecourse;
 
         if (!filePath) {
+            console.log('No hay imagecourse en el curso:', courseId);
             return res.status(404).json({ 
                 message: 'No hay imagen disponible para este curso' 
             });
         }
 
+        console.log('Ruta original:', filePath);
+
         // Normalizar la ruta (convertir barras de Windows a formato universal si es necesario)
         const normalizedPath = filePath.replace(/\\/g, '/');
+        console.log('Ruta normalizada:', normalizedPath);
 
         // Extraer el nombre del archivo de la ruta original
         const fileName = path.basename(normalizedPath);
@@ -233,10 +237,17 @@ const downloadCourseFile = async (req, res) => {
 
         // Verificar que el archivo existe (path.resolve maneja ambos formatos)
         const fullPath = path.resolve(normalizedPath);
+        console.log('Ruta completa resuelta:', fullPath);
+        console.log('¿Archivo existe?', fs.existsSync(fullPath));
 
         if (!fs.existsSync(fullPath)) {
             return res.status(404).json({ 
-                message: 'Archivo no encontrado en el servidor' 
+                message: 'Archivo no encontrado en el servidor',
+                debug: {
+                    original: filePath,
+                    normalized: normalizedPath,
+                    resolved: fullPath
+                }
             });
         }
 

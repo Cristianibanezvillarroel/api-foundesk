@@ -1,13 +1,16 @@
 const User = require('../models/User.model')
+const EnterpriseUser = require('../models/EnterpriseUser.model')
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const transporter = require('../config/email')
+const path = require('path')
+const fs = require('fs')
 
 const postUser = async (req, res) => {
 
     try {
 
-        const { email, password } = req.body
+        const { email, password, enterpriseId } = req.body
         const existingUser = await User.findOne({ email })
         if (existingUser) {
             return res.json({
@@ -25,6 +28,24 @@ const postUser = async (req, res) => {
         user.confirmUserExpires = Date.now() + 3600000
 
         await user.save()
+
+        // Si se proporciona un enterpriseId, crear el registro en EnterpriseUser
+        if (enterpriseId) {
+            try {
+                const enterpriseUser = new EnterpriseUser({
+                    enterprise: enterpriseId,
+                    user: user._id,
+                    role: 'member',
+                    status: 'invited',
+                    invitedAt: new Date()
+                })
+                await enterpriseUser.save()
+                console.log(`Usuario ${user.email} asignado a la empresa ${enterpriseId}`)
+            } catch (enterpriseError) {
+                console.error('Error al asignar usuario a empresa:', enterpriseError)
+                // No detenemos el flujo si falla la asignación a empresa
+            }
+        }
 
         const pin = await confirmUser(user)
 
@@ -351,6 +372,320 @@ const confirmUserPin = async (req, res) => {
 }
 
 
+// ---------------------------------------
+// Obtener usuarios staff (@foundesk.cl)
+// ---------------------------------------
+const getStaffUsers = async (req, res) => {
+    try {
+        const staffUsers = await User.find({
+            email: { $regex: '@foundesk\\.cl$', $options: 'i' }
+        }).select('-password').sort({ createdAt: -1 })
+
+        return res.json({
+            message: "OK",
+            detail: staffUsers
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error al obtener usuarios staff",
+            detail: error.message
+        })
+    }
+}
+
+// ---------------------------------------
+// Actualizar isStaff de un usuario
+// ---------------------------------------
+const updateUserIsStaff = async (req, res) => {
+    try {
+        const { userId, isStaff } = req.body
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { isStaff },
+            { new: true }
+        ).select('-password')
+
+        if (!user) {
+            return res.status(404).json({
+                message: "Usuario no encontrado"
+            })
+        }
+
+        return res.json({
+            message: "Estado de staff actualizado",
+            detail: user
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error al actualizar isStaff",
+            detail: error.message
+        })
+    }
+}
+
+// ---------------------------------------
+// Actualizar isStaffDefault de un usuario
+// ---------------------------------------
+const updateUserIsStaffDefault = async (req, res) => {
+    try {
+        const { userId } = req.body
+
+        // Primero, poner todos en false
+        await User.updateMany(
+            { email: { $regex: '@foundesk\\.cl$', $options: 'i' } },
+            { isStaffDefault: false }
+        )
+
+        // Luego, poner el seleccionado en true
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { isStaffDefault: true },
+            { new: true }
+        ).select('-password')
+
+        if (!user) {
+            return res.status(404).json({
+                message: "Usuario no encontrado"
+            })
+        }
+
+        return res.json({
+            message: "Usuario staff por defecto actualizado",
+            detail: user
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error al actualizar isStaffDefault",
+            detail: error.message
+        })
+    }
+}
+
+
+// ---------------------------------------
+// Obtener staff asignado por userId
+// ---------------------------------------
+const getStaffByUser = async (req, res) => {
+    try {
+        const { userId } = req.params
+
+        // Buscar el usuario
+        let user = await User.findById(userId).select('-password')
+
+        if (!user) {
+            return res.status(404).json({
+                message: "Usuario no encontrado"
+            })
+        }
+
+        // Si ya tiene parentUserId, devolver ese usuario
+        if (user.parentUserId) {
+            const parentUser = await User.findById(user.parentUserId).select('-password')
+            return res.json({
+                message: "OK",
+                detail: parentUser
+            })
+        }
+
+        // Si no tiene parentUserId, buscar el usuario con isStaffDefault: true
+        const defaultStaff = await User.findOne({ isStaffDefault: true }).select('-password')
+
+        if (!defaultStaff) {
+            return res.status(404).json({
+                message: "No hay usuario staff por defecto configurado"
+            })
+        }
+
+        // Asignar el defaultStaff como parentUserId
+        user.parentUserId = defaultStaff._id
+        await user.save()
+
+        return res.json({
+            message: "OK",
+            detail: defaultStaff
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error al obtener staff",
+            detail: error.message
+        })
+    }
+}
+
+
+// ---------------------------------------
+// Actualizar parentUserId de un usuario
+// ---------------------------------------
+const updateUserParentUserId = async (req, res) => {
+    try {
+        const { userId, parentUserId } = req.body
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { parentUserId },
+            { new: true }
+        ).select('-password')
+
+        if (!user) {
+            return res.status(404).json({
+                message: "Usuario no encontrado"
+            })
+        }
+
+        return res.json({
+            message: "Staff asignado actualizado",
+            detail: user
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error al actualizar staff asignado",
+            detail: error.message
+        })
+    }
+}
+
+// Subir archivos de usuario (CV, foto)
+const uploadUserFiles = async (req, res) => {
+    try {
+        const userId = req.user
+
+        if (!userId) {
+            return res.status(400).json({ message: 'Usuario no identificado' })
+        }
+
+        const user = await User.findById(userId)
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' })
+        }
+
+        // req.files contiene los archivos subidos gracias a multer
+        const updates = {}
+
+        if (req.files.cv && req.files.cv[0]) {
+            updates.cv = req.files.cv[0].path
+        }
+
+        if (req.files.photo && req.files.photo[0]) {
+            updates.photo = req.files.photo[0].path
+        }
+
+        // Actualizar solo los campos que fueron enviados
+        Object.assign(user, updates)
+        user.updatedAt = Date.now()
+
+        await user.save()
+
+        const updatedUser = await User.findById(userId).select('-password')
+
+        return res.json({
+            message: 'Archivos subidos correctamente',
+            detail: updatedUser
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error al subir archivos',
+            detail: error.message
+        })
+    }
+}
+
+// Descargar archivo de usuarioconst getUserByEmail = async (req, res) => {
+const getUserByEmail = async (req, res) => {
+    try {
+        const { email } = req.query
+
+        if (!email) {
+            return res.status(400).json({
+                message: 'Email es requerido'
+            })
+        }
+
+        const user = await User.findOne({ email }).select('-password')
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'Usuario no encontrado',
+                found: false
+            })
+        }
+
+        return res.json({
+            message: 'Usuario encontrado',
+            found: true,
+            detail: user
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error al buscar usuario',
+            detail: error.message
+        })
+    }
+}
+
+const downloadUserFile = async (req, res) => {
+    try {
+        const userId = req.user
+        const { fileType } = req.params
+
+        if (!userId) {
+            return res.status(400).json({ message: 'Usuario no identificado' })
+        }
+
+        const user = await User.findById(userId)
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' })
+        }
+
+        // Obtener la ruta del archivo según el tipo
+        let filePath
+        if (fileType === 'cv') {
+            filePath = user.cv
+        } else if (fileType === 'photo') {
+            filePath = user.photo
+        } else {
+            return res.status(400).json({ message: 'Tipo de archivo no válido' })
+        }
+
+        if (!filePath) {
+            return res.status(404).json({ message: 'Archivo no encontrado en la base de datos' })
+        }
+
+        // Normalizar la ruta (convertir barras de Windows a formato universal si es necesario)
+        const normalizedPath = filePath.replace(/\\/g, '/');
+
+        // Extraer el nombre del archivo de la ruta normalizada
+        const fileName = path.basename(normalizedPath);
+        const fileExt = path.extname(fileName).toLowerCase();
+
+        // Verificar que el archivo existe (path.resolve maneja ambos formatos)
+        const fullPath = path.resolve(normalizedPath);
+
+        if (!fs.existsSync(fullPath)) {
+            return res.status(404).json({ message: 'Archivo no encontrado en el servidor' });
+        }
+        const mimeTypes = {
+            '.pdf': 'application/pdf',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png'
+        }
+
+        const mimeType = mimeTypes[fileExt] || 'application/octet-stream'
+
+        res.setHeader('Content-Type', mimeType)
+        res.setHeader('Content-Disposition', `inline; filename="${fileName}"`)
+
+        return res.sendFile(fullPath)
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error al descargar archivo',
+            detail: error.message
+        })
+    }
+}
+
+
 module.exports = {
     postUser,
     login,
@@ -360,5 +695,13 @@ module.exports = {
     requestResetPassword,
     requestResetPasswordConfirm,
     confirmUser,
-    confirmUserPin
+    confirmUserPin,
+    getStaffUsers,
+    updateUserIsStaff,
+    updateUserIsStaffDefault,
+    getStaffByUser,
+    updateUserParentUserId,
+    uploadUserFiles,
+    downloadUserFile,
+    getUserByEmail
 }

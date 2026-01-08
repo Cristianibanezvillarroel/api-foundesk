@@ -16,9 +16,16 @@ const usercoursesprogressSchema = new mongoose.Schema({
         ref: 'CoursesSectionsLessons',
         required: true
     },
+    minutesConsumed: { type: Number, default: 0 },
+    lastPositionSeconds: { type: Number, default: 0 },
+    isCompleted: { type: Boolean, default: false },
+    completedAt: { type: Date },
     status: { type: Boolean, default: true },
     updatedAt: {type: Date, default: Date.now}
 }, { collection: 'usercoursesprogress' });
+
+// Índice único para evitar duplicados
+usercoursesprogressSchema.index({ user: 1, coursessectionslessons: 1 }, { unique: true });
 
 const UserCoursesProgress = mongoose.model('UserCoursesProgress', usercoursesprogressSchema)
 module.exports = UserCoursesProgress;

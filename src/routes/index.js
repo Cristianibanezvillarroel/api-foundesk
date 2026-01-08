@@ -10,6 +10,7 @@ coursesCategoriesDetailRouter = require('./CoursesCategoriesDetail.router'),
 coursesRouter = require('./Courses.router'),
 customerDiaryRouter = require('./CustomerDiary.router'),
 userRouter = require('./User.router'),
+userInvoiceRouter = require('./UserInvoice.router'),
 coursesLearnItemsRouter = require('./CoursesLearnItems.router'),
 coursesSectionsRouter = require('./CoursesSections.router'),
 coursesSectionsLessonsRouter = require('./CoursesSectionsLessons.router'),
@@ -29,8 +30,12 @@ coursesAnswersRouter = require('./CoursesAnswers.router'),
 faqRouter = require('./Faq.router'),
 itUsefulRouter = require('./ItUseful.router'),
 userCoursesProgressRouter = require('./UserCoursesProgress.router'),
-messagesRouter = require('./Messages.router');
-coursesStatisticsRouter = require('./CoursesStatistics.router');
+messagesRouter = require('./Messages.router'),
+coursesStatisticsRouter = require('./CoursesStatistics.router'),
+teacherSignedDocumentRouter = require('./TeacherSignedDocument.router'),
+enterpriseUserRouter = require('./EnterpriseUser.router'),
+enterpriseRouter = require('./Enterprise.router'),
+subscriptionPlanRouter = require('./SubscriptionPlan.router');
 
 // Definir las rutas y sus controladores
 router.use('/blog', blogRouter)
@@ -47,6 +52,7 @@ router.use('/coursessectionslessons', coursesSectionsLessonsRouter)
 router.use('/teacher', teacherRouter)
 router.use('/customerdiary', customerDiaryRouter)
 router.use('/user', userRouter)
+router.use('/userinvoice', userInvoiceRouter)
 router.use('/mercadopago', mercadopagoRouter)
 router.use('/usercourses', userCoursesRouter)
 router.use('/usercoursesnotes', userCoursesNotesRouter)
@@ -64,6 +70,10 @@ router.use('/ituseful', itUsefulRouter)
 router.use('/usercoursesprogress', userCoursesProgressRouter)
 router.use('/messages', messagesRouter);
 router.use('/coursesstatistics', coursesStatisticsRouter);
+router.use('/teachersigneddocument', teacherSignedDocumentRouter);
+router.use('/enterpriseuser', enterpriseUserRouter);
+router.use('/enterprise', enterpriseRouter);
+router.use('/subscriptionplan', subscriptionPlanRouter);
 
 
 module.exports = router;

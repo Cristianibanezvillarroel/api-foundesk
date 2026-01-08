@@ -3,10 +3,14 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
+// Ruta base absoluta para almacenamiento de uploads
+// IMPORTANTE: Esta ruta debe estar FUERA del proyecto para no perderse en actualizaciones
+const UPLOADS_BASE_PATH = process.env.UPLOADS_BASE_PATH || path.join(process.cwd(), 'uploads')
+
 // Función para generar hash y estructura de carpetas
-const generateFolderPath = (userId, baseFolder) => {
+const generateFolderPath = (userId, subfolder) => {
   const hash = crypto.createHash('md5').update(userId.toString()).digest('hex');
-  const folderPath = path.join(baseFolder, hash[0], hash[1], hash[2]);
+  const folderPath = path.join(UPLOADS_BASE_PATH, subfolder, hash[0], hash[1], hash[2]);
   
   // Crear carpetas recursivamente si no existen
   if (!fs.existsSync(folderPath)) {
@@ -29,13 +33,13 @@ const storage = multer.diskStorage({
 
     try {
       if (file.fieldname === 'cv') {
-        folderPath = generateFolderPath(userId, 'uploads/cv');
+        folderPath = generateFolderPath(userId, 'cv');
       } else if (file.fieldname === 'photo') {
-        folderPath = generateFolderPath(userId, 'uploads/photo');
+        folderPath = generateFolderPath(userId, 'photo');
       } else if (file.fieldname === 'imagecourse') {
-        folderPath = generateFolderPath(userId, 'uploads/imagecourse');
+        folderPath = generateFolderPath(userId, 'imagecourse');
       } else if (file.fieldname === 'downloadable') {
-        folderPath = generateFolderPath(userId, 'uploads/downloadable');
+        folderPath = generateFolderPath(userId, 'downloadable');
       } else {
         return cb(new Error("Campo de archivo no permitido"), null);
       }
