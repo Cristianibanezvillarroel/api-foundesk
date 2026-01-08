@@ -7,9 +7,6 @@ const createEnterprise = async (req, res) => {
         const userId = req.user
         const { name, taxId, billingEmail, slug } = req.body
 
-        console.log('Usuario ID:', userId)
-        console.log('Datos recibidos:', { name, taxId, billingEmail, slug })
-
         // Validaciones
         if (!name || !taxId || !billingEmail || !slug) {
             return res.status(400).json({
@@ -35,9 +32,7 @@ const createEnterprise = async (req, res) => {
             status: 'active'
         })
 
-        console.log('Empresa antes de guardar:', enterprise)
         await enterprise.save()
-        console.log('Empresa guardada con ID:', enterprise._id)
 
         // Crear el registro de EnterpriseUser como admin
         const enterpriseUser = new EnterpriseUser({
@@ -49,7 +44,6 @@ const createEnterprise = async (req, res) => {
         })
 
         await enterpriseUser.save()
-        console.log('EnterpriseUser guardado con ID:', enterpriseUser._id)
 
         const populatedEnterprise = await Enterprise.findById(enterprise._id)
             .populate('adminUser', 'name lastname email')
