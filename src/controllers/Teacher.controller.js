@@ -449,9 +449,21 @@ const downloadTeacherFile = async (req, res) => {
       hasPhoto: !!teacher.photo
     });
 
+    // Debug detallado de objetos antes de validar permisos
+    console.log('currentUser completo:', currentUser);
+    console.log('teacher.user completo:', teacher.user);
+    console.log('teacher.user._id:', teacher.user?._id);
+    console.log('currentUser._id:', currentUser?._id);
+
     // Validar permisos: debe ser el owner o superadmin
-    const isOwner = teacher.user._id.toString() === currentUser._id.toString();
-    const isSuperAdmin = currentUser.role === 'superadmin';
+    // Manejar caso donde currentUser puede ser solo un string (el ID)
+    const currentUserId = typeof currentUser === 'string' ? currentUser : currentUser?._id?.toString();
+    const teacherUserId = teacher.user?._id?.toString();
+    
+    console.log('IDs para comparación:', { currentUserId, teacherUserId });
+    
+    const isOwner = currentUserId && teacherUserId && currentUserId === teacherUserId;
+    const isSuperAdmin = currentUser?.role === 'superadmin' || (typeof currentUser === 'object' && currentUser?.role === 'superadmin');
 
     console.log('Validación de permisos:', { isOwner, isSuperAdmin });
 
