@@ -415,7 +415,7 @@ const downloadTeacherFile = async (req, res) => {
   const path = require('path');
 
   try {
-    const { fileType } = req.params; // 'cv' o 'photo'
+    const { fileType, teacherId } = req.params; // 'cv' o 'photo'
     const userId = req.user; // del middleware auth
 
     // Validar tipo de archivo
@@ -424,7 +424,7 @@ const downloadTeacherFile = async (req, res) => {
     }
 
     // Buscar el teacher del usuario autenticado
-    const teacher = await Teacher.findOne({ user: userId });
+    const teacher = await Teacher.findById(teacherId);
 
     if (!teacher) {
       return res.status(404).json({ message: 'No se encontró solicitud de teacher' });
