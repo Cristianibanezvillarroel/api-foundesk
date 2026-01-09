@@ -418,19 +418,6 @@ const downloadTeacherFile = async (req, res) => {
     const { fileType, teacherId } = req.params; // 'cv' o 'photo'
     const currentUser = req.user; // del middleware auth
 
-    // Debug logs
-    console.log('=== downloadTeacherFile Debug ===');
-    console.log('req.params:', req.params);
-    console.log('fileType:', fileType);
-    console.log('teacherId:', teacherId);
-    console.log('currentUser:', currentUser?._id, currentUser?.role);
-    console.log('================================');
-
-    // Validar teacherId
-    if (!teacherId) {
-      return res.status(400).json({ message: 'Se requiere teacherId' });
-    }
-
     // Validar tipo de archivo
     if (!['cv', 'photo'].includes(fileType)) {
       return res.status(400).json({ message: 'Tipo de archivo no válido' });
@@ -482,28 +469,13 @@ const downloadTeacherFile = async (req, res) => {
 
     const mimeType = mimeTypes[fileExt] || 'application/octet-stream';
 
-    // Configurar headers CORS y de archivo
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
     res.setHeader('Content-Type', mimeType);
     res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
 
-    // Leer y enviar el archivo como stream para evitar problemas CORS
-    const fileStream = fs.createReadStream(fullPath);
-    
-    fileStream.on('error', (error) => {
-      console.error('Error al leer archivo:', error);
-      return res.status(500).json({
-        message: 'Error al leer el archivo',
-        detail: error.message
-      });
-    });
-
     // Enviar el archivo
-    fileStream.pipe(res);
+    return res.sendFile(fullPath);
 
   } catch (error) {
-    console.error('Error en downloadTeacherFile:', error);
     return res.status(500).json({
       message: 'Error al descargar archivo',
       detail: error.message
