@@ -464,7 +464,7 @@ const downloadTeacherFile = async (req, res) => {
     console.log('IDs para comparación:', { currentUserId, teacherUserId });
     
     const isOwner = currentUserId && teacherUserId && currentUserId === teacherUserId;
-    const isSuperAdmin = currentUser?.role === 'superadmin' || (typeof currentUser === 'object' && currentUser?.role === 'superadmin');
+    const isSuperAdmin = currentUser?.role?.includes('superadmin');
 
     console.log('Validación de permisos:', { isOwner, isSuperAdmin });
 
