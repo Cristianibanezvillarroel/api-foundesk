@@ -416,7 +416,9 @@ const downloadTeacherFile = async (req, res) => {
 
   try {
     const { fileType, teacherId } = req.params; // 'cv' o 'photo'
-    const currentUser = req.user; // del middleware auth
+    const currentUserId = req.user; // del middleware auth
+
+    const currentUser = await User.findById(currentUserId);
 
     // Debug logs
     console.log('=== downloadTeacherFile Debug ===');
@@ -457,7 +459,6 @@ const downloadTeacherFile = async (req, res) => {
 
     // Validar permisos: debe ser el owner o superadmin
     // Manejar caso donde currentUser puede ser solo un string (el ID)
-    const currentUserId = typeof currentUser === 'string' ? currentUser : currentUser?._id?.toString();
     const teacherUserId = teacher.user?._id?.toString();
     
     console.log('IDs para comparación:', { currentUserId, teacherUserId });
