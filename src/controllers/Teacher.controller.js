@@ -171,15 +171,22 @@ const teacherRequest = async (req, res) => {
       await userDoc.save() // ahora sí es documento Mongoose
       await teacher.save()
 
+      // Buscar por user correctamente
+      const teacherReturn = await Teacher.findOne({ user })
+        .populate([
+          { path: 'categorie' },
+          { path: 'user' }
+        ])
+
       const mailResult = await transporter.sendMail({
         from: `"Foundesk" <${process.env.MAIL_USER}>`,
         to: userDoc.email,
         subject: "🔐 Solicitud para Instructor - Foundesk",
         html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2>Hola ${teacher.name}.</h2>
-                    <p>Hemos recibido tu solicitud para participar como instructor en Foundesk, la primera suite de cursos online on-demand de Chile para la administración y marketing del emprendedor.</p>
-                    <p>Has señalado que deseas participar en el área de ${teacher.categorie.categorie} y particularmente para dictar el curso ${teacher.courseName}.</p>
+                    <h2>Hola ${userDoc.name}.</h2>
+                    <p>Hemos recibido tu solicitud para participar como instructor en Foundesk, la primera suite de cursos online on-demand de Chile para la administración y marketing de la pyme.</p>
+                    <p>Has señalado que deseas participar en el área de ${teacherReturn.categorie.categorie} y particularmente para dictar el curso ${teacherReturn.courseName}.</p>
 
                     <p style="margin-top: 20px;">
                         Te estaremos comunicando a la brevedad para agendar una reunión y revisar detalles para esto.
@@ -218,14 +225,6 @@ const teacherRequest = async (req, res) => {
                 </div>
             `,
       });
-
-
-      // Buscar por user correctamente
-      const teacherReturn = await Teacher.findOne({ user })
-        .populate([
-          { path: 'categorie' },
-          { path: 'user' }
-        ])
 
       return res.json({
         message: 'Solicitud enviada correctamente.',
