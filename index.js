@@ -5,7 +5,7 @@ const app = express();
 const bodyParser = require('body-parser')
 const path = require('path')
 require('dotenv').config()
-const port = process.env.PORT;
+//const port = process.env.PORT;
 const cors = require('cors')
 
 const corsOptions = {
@@ -23,9 +23,9 @@ app.use('/v1/uploads', express.static(path.join(__dirname, 'uploads')))
 
 app.use('/v1', routes)
 
-mongoose.connect(process.env.MONGO_URI)
+//mongoose.connect(process.env.MONGO_URI)
 
 
 app.listen(port, () => {
-    console.log(`la api de foundesk esta escuchando en el puerto: ${port} y la uri de la base de datos es: ${process.env.MONGO_URI}`)
+    console.log(`la api de foundesk esta escuchando`)
 })
