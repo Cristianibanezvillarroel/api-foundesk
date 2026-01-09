@@ -26,6 +26,6 @@ app.use('/v1', routes)
 //mongoose.connect(process.env.MONGO_URI)
 
 
-app.listen(port, () => {
+app.listen(() => {
     console.log(`la api de foundesk esta escuchando`)
 })
