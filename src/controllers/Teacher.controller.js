@@ -418,6 +418,19 @@ const downloadTeacherFile = async (req, res) => {
     const { fileType, teacherId } = req.params; // 'cv' o 'photo'
     const currentUser = req.user; // del middleware auth
 
+    // Debug logs
+    console.log('=== downloadTeacherFile Debug ===');
+    console.log('req.params:', req.params);
+    console.log('fileType:', fileType);
+    console.log('teacherId:', teacherId);
+    console.log('currentUser:', currentUser?._id, currentUser?.role);
+    console.log('================================');
+
+    // Validar teacherId
+    if (!teacherId) {
+      return res.status(400).json({ message: 'Se requiere teacherId' });
+    }
+
     // Validar tipo de archivo
     if (!['cv', 'photo'].includes(fileType)) {
       return res.status(400).json({ message: 'Tipo de archivo no válido' });
