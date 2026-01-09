@@ -416,18 +416,26 @@ const downloadTeacherFile = async (req, res) => {
 
   try {
     const { fileType, teacherId } = req.params; // 'cv' o 'photo'
-    const userId = req.user; // del middleware auth
+    const currentUser = req.user; // del middleware auth
 
     // Validar tipo de archivo
     if (!['cv', 'photo'].includes(fileType)) {
       return res.status(400).json({ message: 'Tipo de archivo no válido' });
     }
 
-    // Buscar el teacher del usuario autenticado
-    const teacher = await Teacher.findById(teacherId);
+    // Buscar el teacher
+    const teacher = await Teacher.findById(teacherId).populate('user');
 
     if (!teacher) {
       return res.status(404).json({ message: 'No se encontró solicitud de teacher' });
+    }
+
+    // Validar permisos: debe ser el owner o superadmin
+    const isOwner = teacher.user._id.toString() === currentUser._id.toString();
+    const isSuperAdmin = currentUser.role === 'superadmin';
+
+    if (!isOwner && !isSuperAdmin) {
+      return res.status(403).json({ message: 'No tienes permisos para acceder a este archivo' });
     }
 
     // Obtener la ruta del archivo
