@@ -23,9 +23,15 @@ app.use('/v1/uploads', express.static(path.join(__dirname, 'uploads')))
 
 app.use('/v1', routes)
 
-//mongoose.connect(process.env.MONGO_URI)
+// Conexión a MongoDB (usa variable de entorno o valor por defecto)
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/foundesk'
+mongoose.connect(MONGO_URI)
+    .then(() => console.log('✓ Conectado a MongoDB'))
+    .catch(err => console.error('✗ Error conectando a MongoDB:', err))
 
+// Puerto (usa variable de entorno o 3000 por defecto)
+const PORT = process.env.PORT || 3000
 
-app.listen(() => {
-    console.log(`la api de foundesk esta escuchando`)
+app.listen(PORT, () => {
+    console.log(`✓ API de foundesk escuchando en puerto ${PORT}`)
 })
