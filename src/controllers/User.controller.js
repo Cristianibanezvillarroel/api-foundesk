@@ -685,6 +685,70 @@ const downloadUserFile = async (req, res) => {
     }
 }
 
+// Eliminar archivo de usuario
+const deleteUserFiles = async (req, res) => {
+    try {
+        const userId = req.user
+        const { fileType } = req.params
+
+        if (!userId) {
+            return res.status(400).json({ message: 'Usuario no identificado' })
+        }
+
+        const user = await User.findById(userId)
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' })
+        }
+
+        // Obtener la ruta del archivo según el tipo
+        let filePath
+        if (fileType === 'cv') {
+            filePath = user.cv
+        } else if (fileType === 'photo') {
+            filePath = user.photo
+        } else {
+            return res.status(400).json({ message: 'Tipo de archivo no válido' })
+        }
+
+        if (!filePath) {
+            return res.status(404).json({ message: 'Archivo no encontrado en la base de datos' })
+        }
+
+        // Normalizar la ruta
+        const normalizedPath = filePath.replace(/\\/g, '/');
+        const fullPath = path.resolve(normalizedPath);
+
+        // Eliminar el archivo físico si existe
+        if (fs.existsSync(fullPath)) {
+            fs.unlinkSync(fullPath)
+        }
+
+        // Actualizar el usuario removiendo la referencia al archivo
+        const updates = {}
+        if (fileType === 'cv') {
+            updates.cv = null
+        } else if (fileType === 'photo') {
+            updates.photo = null
+        }
+
+        Object.assign(user, updates)
+        user.updatedAt = Date.now()
+        await user.save()
+
+        const updatedUser = await User.findById(userId).select('-password')
+
+        return res.json({
+            message: 'Archivo eliminado correctamente',
+            detail: updatedUser
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error al eliminar archivo',
+            detail: error.message
+        })
+    }
+}
+
 
 module.exports = {
     postUser,
@@ -703,5 +767,6 @@ module.exports = {
     updateUserParentUserId,
     uploadUserFiles,
     downloadUserFile,
+    deleteUserFiles,
     getUserByEmail
 }
