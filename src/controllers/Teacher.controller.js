@@ -420,90 +420,55 @@ const downloadTeacherFile = async (req, res) => {
 
     const currentUser = await User.findById(currentUserId);
 
-    // Debug logs
-    console.log('=== downloadTeacherFile Debug ===');
-    console.log('req.params:', req.params);
-    console.log('fileType:', fileType);
-    console.log('teacherId:', teacherId);
-    console.log('currentUser._id:', currentUser?._id);
-    console.log('currentUser.role:', currentUser?.role);
-    console.log('================================');
-
     // Validar tipo de archivo
     if (!['cv', 'photo'].includes(fileType)) {
-      console.log('❌ Tipo de archivo no válido:', fileType);
       return res.status(400).json({ message: 'Tipo de archivo no válido' });
     }
 
     // Buscar el teacher
-    console.log('Buscando teacher con ID:', teacherId);
     const teacher = await Teacher.findById(teacherId).populate('user');
 
     if (!teacher) {
-      console.log('❌ Teacher no encontrado');
       return res.status(404).json({ message: 'No se encontró solicitud de teacher' });
     }
-
-    console.log('✓ Teacher encontrado:', {
-      teacherId: teacher._id,
-      teacherUserId: teacher.user?._id,
-      hasCV: !!teacher.cv,
-      hasPhoto: !!teacher.photo
-    });
-
-    // Debug detallado de objetos antes de validar permisos
-    console.log('currentUser completo:', currentUser);
-    console.log('teacher.user completo:', teacher.user);
-    console.log('teacher.user._id:', teacher.user?._id);
-    console.log('currentUser._id:', currentUser?._id);
 
     // Validar permisos: debe ser el owner o superadmin
     // Manejar caso donde currentUser puede ser solo un string (el ID)
     const teacherUserId = teacher.user?._id?.toString();
-    
-    console.log('IDs para comparación:', { currentUserId, teacherUserId });
-    
+
     const isOwner = currentUserId && teacherUserId && currentUserId === teacherUserId;
     const isSuperAdmin = currentUser?.role?.includes('superadmin');
 
-    console.log('Validación de permisos:', { isOwner, isSuperAdmin });
-
     if (!isOwner && !isSuperAdmin) {
-      console.log('❌ Sin permisos para acceder al archivo');
       return res.status(403).json({ message: 'No tienes permisos para acceder a este archivo' });
     }
 
     // Obtener la ruta del archivo
-    const filePath = teacher[fileType];
+    // Si es photo, obtenerlo desde teacher.user.photo, si es cv desde teacher.cv
+    let filePath;
+    if (fileType === 'photo') {
+      filePath = teacher.user?.photo;
+    } else {
+      filePath = teacher[fileType];
+    }
 
     if (!filePath) {
-      console.log(`❌ No hay ${fileType} disponible en teacher`);
       return res.status(404).json({ message: `No hay ${fileType} disponible` });
     }
 
-    console.log('Ruta del archivo:', filePath);
-
-    console.log('Ruta del archivo:', filePath);
-
     // Normalizar la ruta (convertir barras de Windows a formato universal si es necesario)
     const normalizedPath = filePath.replace(/\\/g, '/');
-    console.log('Ruta normalizada:', normalizedPath);
 
     // Extraer el nombre del archivo de la ruta normalizada
     const fileName = path.basename(normalizedPath);
     const fileExt = path.extname(fileName).toLowerCase();
-    console.log('Nombre de archivo:', fileName, 'Extensión:', fileExt);
 
     // Verificar que el archivo existe (path.resolve maneja ambos formatos)
     const fullPath = path.resolve(normalizedPath);
-    console.log('Ruta completa resuelta:', fullPath);
 
     if (!fs.existsSync(fullPath)) {
-      console.log('❌ Archivo no existe en el sistema de archivos');
       return res.status(404).json({ message: 'Archivo no encontrado en el servidor' });
     }
-
-    console.log('✓ Archivo existe en el sistema');
 
     // Detectar MIME type basado en la extensión
     const mimeTypes = {
@@ -514,7 +479,6 @@ const downloadTeacherFile = async (req, res) => {
     };
 
     const mimeType = mimeTypes[fileExt] || 'application/octet-stream';
-    console.log('MIME type:', mimeType);
 
     // Configurar headers CORS y de archivo
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -522,11 +486,9 @@ const downloadTeacherFile = async (req, res) => {
     res.setHeader('Content-Type', mimeType);
     res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
 
-    console.log('✓ Headers configurados, enviando archivo...');
-
     // Leer y enviar el archivo como stream para evitar problemas CORS
     const fileStream = fs.createReadStream(fullPath);
-    
+
     fileStream.on('error', (error) => {
       console.error('❌ Error al leer archivo:', error);
       return res.status(500).json({
@@ -536,7 +498,6 @@ const downloadTeacherFile = async (req, res) => {
     });
 
     fileStream.on('end', () => {
-      console.log('✓ Archivo enviado exitosamente');
     });
 
     // Enviar el archivo
