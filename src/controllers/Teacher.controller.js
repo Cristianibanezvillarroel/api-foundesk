@@ -491,17 +491,16 @@ const downloadTeacherFile = async (req, res) => {
 
     fileStream.on('error', (error) => {
       console.error('❌ Error al leer archivo:', error);
-      return res.status(500).json({
-        message: 'Error al leer el archivo',
-        detail: error.message
-      });
-    });
-
-    fileStream.on('end', () => {
+      if (!res.headersSent) {
+        res.status(500).json({
+          message: 'Error al leer el archivo',
+          detail: error.message
+        });
+      }
     });
 
     // Enviar el archivo
-    fileStream.pipe(res);
+    return fileStream.pipe(res);
 
   } catch (error) {
     console.error('❌ Error en downloadTeacherFile:', error);
