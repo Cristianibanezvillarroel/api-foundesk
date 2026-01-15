@@ -663,6 +663,65 @@ const getTeacherContract = async (req, res) => {
   }
 }
 
+// Eliminar foto del teacher
+const deleteTeacherPhoto = async (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+
+  try {
+    const currentUserId = req.user; // del middleware auth
+
+    // Buscar el teacher por user
+    const teacher = await Teacher.findOne({ user: currentUserId }).populate('user');
+
+    if (!teacher) {
+      return res.status(404).json({ message: 'Teacher no encontrado' });
+    }
+
+    // Verificar que existe una foto
+    if (!teacher.photo) {
+      return res.status(404).json({ message: 'No hay foto para eliminar' });
+    }
+
+    const photoPath = teacher.photo;
+
+    // Eliminar el archivo físico si existe
+    try {
+      const fullPath = path.resolve(photoPath);
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+        console.log('✓ Archivo físico eliminado:', fullPath);
+      }
+    } catch (fileErr) {
+      console.error('Error al eliminar archivo físico:', fileErr);
+      // Continuamos aunque falle la eliminación del archivo
+    }
+
+    // Actualizar el documento teacher eliminando la referencia a la foto
+    teacher.photo = null;
+    teacher.updatedAt = new Date();
+    await teacher.save();
+
+    const updatedTeacher = await Teacher.findById(teacher._id)
+      .populate([
+        { path: 'categorie' },
+        { path: 'user' }
+      ]);
+
+    return res.json({
+      message: 'Foto eliminada exitosamente',
+      detail: updatedTeacher
+    });
+
+  } catch (error) {
+    console.error('Error en deleteTeacherPhoto:', error);
+    return res.status(500).json({
+      message: 'Error al eliminar foto',
+      detail: error.message
+    });
+  }
+}
+
 module.exports = {
   getTeacher,
   getTeacherByUser,
@@ -674,5 +733,6 @@ module.exports = {
   teacherCourses,
   downloadTeacherFile,
   updateTeacherContract,
-  getTeacherContract
+  getTeacherContract,
+  deleteTeacherPhoto
 }
