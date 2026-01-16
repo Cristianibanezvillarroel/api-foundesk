@@ -38,8 +38,8 @@ const getMessagesByUser = async (req, res) => {
                 { userTo: userId }
             ]
         })
-            .populate('userFrom', 'name fullname email image')
-            .populate('userTo', 'name fullname email image')
+            .populate('userFrom', 'name lastname email photo')
+            .populate('userTo', 'name lastname email photo')
             .populate('course', 'title _id')
             .sort({ date: -1 }) // ordenar por fecha descendente (más recientes primero)
 
@@ -68,11 +68,9 @@ const getMessagesById = async (req, res) => {
         const { id } = req.params
 
         const messages = await Messages.findById(id)
-            .populate([
-                { path: 'course' },
-                { path: 'userFrom' },
-                { path: 'userTo' }
-            ])
+            .populate('userFrom', 'name lastname email photo')
+            .populate('userTo', 'name lastname email photo')
+            .populate('course', 'title _id')
 
         if (!messages) {
             return res.status(404).json({
@@ -139,8 +137,8 @@ const createMessage = async (req, res) => {
 
         // Poblado para respuesta útil
         const populated = await Messages.findById(message._id)
-            .populate('userFrom', 'name fullname email image')
-            .populate('userTo', 'name fullname email image')
+            .populate('userFrom', 'name lastname email photo')
+            .populate('userTo', 'name lastname email photo')
             .populate('course', 'title _id') // ajustar campos según modelo Course
 
         return res.status(201).json({
@@ -163,8 +161,8 @@ const getMessageThread = async (req, res) => {
         const { id } = req.params
 
         const replies = await Messages.find({ parentMessageId: id })
-            .populate('userFrom', 'name fullname email image')
-            .populate('userTo', 'name fullname email image')
+            .populate('userFrom', 'name lastname email photo')
+            .populate('userTo', 'name lastname email photo')
             .populate('course', 'title _id')
             .sort({ date: 1 }) // más antiguos primero
 
@@ -196,8 +194,8 @@ const updateMessageStatus = async (req, res) => {
             { status, updatedAt: new Date() },
             { new: true }
         )
-            .populate('userFrom', 'name fullname email image')
-            .populate('userTo', 'name fullname email image')
+            .populate('userFrom', 'name lastname email photo')
+            .populate('userTo', 'name lastname email photo')
 
         if (!updated) {
             return res.status(404).json({ message: 'Message not found' })
