@@ -685,6 +685,65 @@ const downloadUserFile = async (req, res) => {
     }
 }
 
+// Descargar archivo de usuario por ID (para ver fotos de otros usuarios)
+const downloadUserFileById = async (req, res) => {
+    try {
+        const { userId, fileType } = req.params
+
+        if (!userId) {
+            return res.status(400).json({ message: 'ID de usuario requerido' })
+        }
+
+        const user = await User.findById(userId)
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' })
+        }
+
+        // Obtener la ruta del archivo según el tipo
+        let filePath
+        if (fileType === 'cv') {
+            filePath = user.cv
+        } else if (fileType === 'photo') {
+            filePath = user.photo
+        } else {
+            return res.status(400).json({ message: 'Tipo de archivo no válido' })
+        }
+
+        if (!filePath) {
+            return res.status(404).json({ message: 'Archivo no encontrado en la base de datos' })
+        }
+
+        // Normalizar la ruta
+        const normalizedPath = filePath.replace(/\\/g, '/');
+        const fileName = path.basename(normalizedPath);
+        const fileExt = path.extname(fileName).toLowerCase();
+        const fullPath = path.resolve(normalizedPath);
+
+        if (!fs.existsSync(fullPath)) {
+            return res.status(404).json({ message: 'Archivo no encontrado en el servidor' });
+        }
+
+        const mimeTypes = {
+            '.pdf': 'application/pdf',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png'
+        }
+
+        const mimeType = mimeTypes[fileExt] || 'application/octet-stream'
+
+        res.setHeader('Content-Type', mimeType)
+        res.setHeader('Content-Disposition', `inline; filename="${fileName}"`)
+
+        return res.sendFile(fullPath)
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error al descargar archivo',
+            detail: error.message
+        })
+    }
+}
+
 // Eliminar archivo de usuario
 const deleteUserFiles = async (req, res) => {
     try {
@@ -767,6 +826,7 @@ module.exports = {
     updateUserParentUserId,
     uploadUserFiles,
     downloadUserFile,
+    downloadUserFileById,
     deleteUserFiles,
     getUserByEmail
 }
