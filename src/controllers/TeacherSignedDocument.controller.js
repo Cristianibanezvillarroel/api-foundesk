@@ -74,15 +74,19 @@ const generateSignedPDF = async ({
     }
 
     browser = await puppeteer.launch({
-      headless: true,
+      headless: 'new',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
         '--disable-software-rasterizer',
-        '--disable-extensions'
+        '--disable-extensions',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+        '--single-process' // Útil en ambientes con recursos limitados
       ],
+      executablePath: process.env.CHROME_PATH || puppeteer.executablePath(),
       ignoreDefaultArgs: ['--disable-extensions']
     })
 
@@ -296,8 +300,15 @@ const createTeacherSignedDocument = async (req, res) => {
       
       // Generar PDF temporal sin firma
       const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        headless: 'new',
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--single-process'
+        ],
+        executablePath: process.env.CHROME_PATH || puppeteer.executablePath()
       })
       const page = await browser.newPage()
       await page.setContent(html, { waitUntil: 'networkidle0' })

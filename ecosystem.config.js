@@ -13,7 +13,8 @@ module.exports = {
         FRONTEND_URL: "https://sistema.foundesk.cl",
         SECRET_JWT: "opciones",
         LEGAL_STORAGE_PATH: "/var/www/foundesk/legal",
-        UPLOADS_BASE_PATH: "/var/www/foundesk/uploads"
+        UPLOADS_BASE_PATH: "/var/www/foundesk/uploads",
+        CHROME_PATH: "/usr/bin/chromium-browser"
       }
     }
   ]
