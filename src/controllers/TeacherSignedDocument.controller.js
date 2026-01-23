@@ -40,13 +40,27 @@ const generateSignedPDF = async ({
   let browser = null
 
   try {
+    console.log('🎨 ========== INICIO GENERACIÓN PDF ==========');
+    console.log('📊 Parámetros recibidos:', {
+      hasHtml: !!html,
+      htmlLength: html?.length,
+      teacherId,
+      documentType,
+      documentVersion,
+      hasSignature: !!signature,
+      hasSignatures: !!signatures,
+      signaturesCount: signatures?.length || (signature ? 1 : 0)
+    });
+
     // Asegurar que el directorio existe
     if (!fs.existsSync(LEGAL_STORAGE_PATH)) {
-      fs.mkdirSync(LEGAL_STORAGE_PATH, { recursive: true })
+      console.log('📁 Creando directorio de almacenamiento:', LEGAL_STORAGE_PATH);
+      fs.mkdirSync(LEGAL_STORAGE_PATH, { recursive: true });
     }
 
     // 1. Determinar qué firmas usar (compatibilidad con formato antiguo)
     const signaturesArray = signatures || (signature ? [signature] : [])
+    console.log('✍️ Firmas a procesar:', signaturesArray.length);
     
     if (signaturesArray.length === 0) {
       throw new Error('Se requiere al menos una firma para generar el PDF')
@@ -66,13 +80,16 @@ const generateSignedPDF = async ({
     })
 
     // 3. Generar el hash del acuerdo (Este es el que irá en el Footer)
+    console.log('🔐 Generando hash del acuerdo...');
     const agreementHash = generateSHA256(agreementData)
 
     // Validar que el hash se generó correctamente
     if (!agreementHash) {
       throw new Error('No se pudo generar el hash del acuerdo')
     }
+    console.log('✅ Hash del acuerdo generado:', agreementHash);
 
+    console.log('🚀 Lanzando Puppeteer...');
     browser = await puppeteer.launch({
       headless: 'new',
       args: [
@@ -80,31 +97,49 @@ const generateSignedPDF = async ({
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
-        '--disable-software-rasterizer',
-        '--disable-extensions',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--single-process' // Útil en ambientes con recursos limitados
+        '--disable-software-rasterizer'
       ],
       executablePath: process.env.CHROME_PATH || puppeteer.executablePath(),
-      ignoreDefaultArgs: ['--disable-extensions']
-    })
-
-    const page = await browser.newPage()
-    
-    // Configurar timeout más largo para la página
-    page.setDefaultNavigationTimeout(60000)
-    page.setDefaultTimeout(60000)
-    
-    // Aumentar timeout y usar waitUntil más permisivo para evitar timeout
-    await page.setContent(html, { 
-      waitUntil: 'domcontentloaded',
       timeout: 60000
     })
+    console.log('✅ Puppeteer lanzado exitosamente');
+
+    console.log('📄 Creando nueva página...');
+    const page = await browser.newPage()
+    console.log('✅ Página creada');
+    
+    // Configurar timeout más largo para la página
+    page.setDefaultNavigationTimeout(90000)
+    page.setDefaultTimeout(90000)
+    console.log('⏱️ Timeouts configurados: 90000ms');
+    
+    console.log('📄 HTML size:', Math.round(html.length / 1024), 'KB')
+    
+    // Aumentar timeout y usar waitUntil más permisivo para evitar timeout
+    try {
+      console.log('📝 Cargando HTML en página...');
+      await page.setContent(html, { 
+        waitUntil: 'domcontentloaded',
+        timeout: 90000
+      })
+      console.log('✅ HTML cargado correctamente en Puppeteer')
+    } catch (contentError) {
+      console.error('❌ Error al cargar HTML en Puppeteer:', {
+        message: contentError.message,
+        name: contentError.name,
+        stack: contentError.stack,
+        htmlLength: html.length,
+        htmlPreview: html.substring(0, 500)
+      })
+      throw new Error(`Error al procesar el contenido HTML: ${contentError.message}`)
+    }
     
     // Pequeño delay para asegurar que el contenido está listo
+    console.log('⏳ Esperando 1 segundo para estabilizar contenido...');
     await new Promise(resolve => setTimeout(resolve, 1000))
+    console.log('✅ Contenido estabilizado');
 
+    console.log('📄 Generando PDF buffer...');
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
@@ -123,14 +158,21 @@ const generateSignedPDF = async ({
         left: '20mm'
       }
     })
+    console.log('✅ PDF buffer generado, tamaño:', Math.round(pdfBuffer.length / 1024), 'KB');
 
+    console.log('🔐 Generando hash del PDF...');
     const hash = generateSHA256(pdfBuffer)
+    console.log('✅ Hash del PDF:', hash);
+    
     const timestamp = Date.now()
     const fileName = `${documentType}_v${documentVersion}_${teacherId}_${timestamp}.pdf`
     const filePath = path.join(LEGAL_STORAGE_PATH, fileName)
+    console.log('💾 Guardando PDF en:', filePath);
 
     fs.writeFileSync(filePath, pdfBuffer)
+    console.log('✅ PDF guardado exitosamente');
 
+    console.log('🎉 ========== PDF GENERADO EXITOSAMENTE ==========');
     return {
       filePath,
       fileName,
@@ -138,10 +180,20 @@ const generateSignedPDF = async ({
       agreementHash
     }
   } catch (error) {
+    console.error('❌ ========== ERROR EN GENERACIÓN DE PDF ==========');
+    console.error('❌ Nombre del error:', error.name);
+    console.error('❌ Mensaje:', error.message);
+    console.error('❌ Stack:', error.stack);
     throw new Error(`Error generando PDF: ${error.message}`)
   } finally {
     if (browser) {
-      await browser.close()
+      console.log('🔒 Cerrando browser de Puppeteer...');
+      try {
+        await browser.close()
+        console.log('✅ Browser cerrado correctamente');
+      } catch (closeError) {
+        console.error('⚠️ Error al cerrar browser:', closeError.message);
+      }
     }
   }
 }
@@ -153,12 +205,17 @@ const createTeacherSignedDocument = async (req, res) => {
   let generatedFilePath = null
 
   try {
+    console.log('🚀 ========== INICIO CREATE TEACHER SIGNED DOCUMENT ==========')
+    console.log('📦 req.body completo:', JSON.stringify(req.body, null, 2))
 
     // Obtener la IP real del cliente
     // req.headers['x-forwarded-for'] es usado cuando pasas por Nginx
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] ||
       req.socket.remoteAddress ||
       req.ip;
+
+    console.log('🌐 Cliente IP:', clientIp)
+    console.log('🖥️ User Agent:', req.headers['user-agent'])
 
     const {
       html,
@@ -170,72 +227,116 @@ const createTeacherSignedDocument = async (req, res) => {
       status
     } = req.body
 
+    // Log para debugging
+    console.log('📝 CREATE DOCUMENT REQUEST:', {
+      teacherId: teacher,
+      documentType,
+      documentVersion,
+      hasHtml: !!html,
+      htmlLength: html?.length || 0,
+      hasSignature: !!signature,
+      signature: signature,
+      metadataKeys: metadata ? Object.keys(metadata) : [],
+      clausesCount: metadata?.clauses?.length || 0,
+      status: status
+    })
+
     // Validaciones básicas
+    console.log('✅ Iniciando validaciones básicas...')
     if (!html || !teacher || !documentType || !documentVersion) {
+      console.error('❌ Validación fallida - Campos faltantes:', {
+        hasHtml: !!html,
+        hasTeacher: !!teacher,
+        hasDocumentType: !!documentType,
+        hasDocumentVersion: !!documentVersion
+      })
       return res.status(400).json({
         message: 'Faltan campos requeridos: html, teacher, documentType, documentVersion'
       })
     }
+    console.log('✅ Validaciones básicas pasadas')
 
     // Si hay firma, validarla
     if (signature) {
+      console.log('✅ Validando firma proporcionada:', signature)
       if (!signature.fullName || !signature.rut || !signature.acceptedAt) {
+        console.error('❌ Validación de firma fallida - Campos incompletos:', {
+          hasFullName: !!signature.fullName,
+          hasRut: !!signature.rut,
+          hasAcceptedAt: !!signature.acceptedAt
+        })
         return res.status(400).json({
           message: 'La firma debe incluir: fullName, rut, acceptedAt'
         })
       }
+      console.log('✅ Validación de firma pasada')
     }
 
     // Verificar si ya existe un documento activo del mismo tipo para este instructor
+    console.log('🔍 Verificando si existe documento activo para:', { teacher, documentType })
     const existingDoc = await TeacherSignedDocument.findOne({
       teacher,
       documentType,
       status: 'active'
     })
 
-    if (existingDoc) {
-      // Validar versión del documento
-      if (existingDoc.documentVersion === documentVersion) {
-        // Si la versión es la misma, no permitir firmar de nuevo
-        return res.status(409).json({
-          message: `Ya existe un documento firmado para la versión ${documentVersion}. No se puede volver a firmar el mismo documento.`,
-          existingDocument: {
-            _id: existingDoc._id,
-            documentVersion: existingDoc.documentVersion,
-            signedAt: existingDoc.signature.acceptedAt
-          }
-        })
-      }
+    // Calcular el agreementVersion automáticamente
+    console.log('🔢 Calculando agreementVersion...')
+    let agreementVersion = '1.0'
+    
+    // Buscar todos los documentos del mismo teacher y documentType
+    const allDocs = await TeacherSignedDocument.find({
+      teacher,
+      documentType
+    }).sort({ agreementVersion: -1 }).limit(1)
+    
+    if (allDocs.length > 0) {
+      const latestAgreementVersion = allDocs[0].agreementVersion || '1.0'
+      const latestVersion = parseFloat(latestAgreementVersion)
+      agreementVersion = (latestVersion + 0.1).toFixed(1)
+      console.log('📊 Última agreementVersion:', latestAgreementVersion, '→ Nueva:', agreementVersion)
+    } else {
+      console.log('📊 Primera agreementVersion para esta combinación teacher-documentType:', agreementVersion)
+    }
 
-      // Si la versión del frontend es superior, marcar el anterior como superseded
-      if (parseFloat(documentVersion) > parseFloat(existingDoc.documentVersion)) {
-        await TeacherSignedDocument.updateOne(
-          { _id: existingDoc._id },
-          { $set: { status: 'superseded' } }
-        );
-      } else {
-        // Si la versión del frontend es inferior a la existente
-        return res.status(400).json({
-          message: `La versión ${documentVersion} es inferior a la versión activa ${existingDoc.documentVersion}. No se puede firmar una versión anterior.`,
-          currentVersion: existingDoc.documentVersion
-        })
-      }
+    if (existingDoc) {
+      console.log('⚠️ Documento existente encontrado:', {
+        id: existingDoc._id,
+        documentVersion: existingDoc.documentVersion,
+        agreementVersion: existingDoc.agreementVersion,
+        status: existingDoc.status
+      })
+      
+      // Marcar el documento anterior como superseded si existe uno activo
+      // Ya no validamos por documentVersion, solo marcamos como superseded
+      console.log('📝 Marcando documento anterior como superseded')
+      await TeacherSignedDocument.updateOne(
+        { _id: existingDoc._id },
+        { $set: { status: 'superseded' } }
+      )
+      console.log('✅ Documento anterior marcado como superseded')
+    } else {
+      console.log('✅ No se encontró documento activo existente')
     }
 
     // 1. Generar el PDF con firma (puede ser admin o instructor según tipo de documento)
+    console.log('📄 Iniciando generación de PDF...')
     let filePath, fileName, hash, agreementHash
     
     if (signature) {
+      console.log('🖊️ Procesando documento con firma...')
       // Determinar el rol según el tipo de documento
       let signatureRole = 'admin' // Por defecto admin
       let documentStatus = 'pending_teacher_signature' // Por defecto espera firma del teacher
       
       // Para documentos de principios, el instructor firma directamente
       if (documentType === 'teacher_principles') {
+        console.log('📋 Tipo de documento: teacher_principles - Firma directa del instructor')
         signatureRole = 'instructor'
         documentStatus = 'active' // Ya está activo con una sola firma
         
         // Marcar documentos anteriores del mismo tipo como superseded
+        console.log('🔄 Marcando documentos anteriores de principios como superseded...')
         await TeacherSignedDocument.updateMany(
           { 
             teacher,
@@ -244,9 +345,13 @@ const createTeacherSignedDocument = async (req, res) => {
           },
           { $set: { status: 'superseded' } }
         )
+        console.log('✅ Documentos anteriores de principios marcados como superseded')
+      } else {
+        console.log('📋 Tipo de documento: teacher_contract - Primera firma (admin)')
       }
       
       // Crear objeto de firma con hash individual
+      console.log('🔐 Generando hash de firma individual...')
       const documentSignature = {
         fullName: signature.fullName,
         rut: signature.rut,
@@ -261,14 +366,21 @@ const createTeacherSignedDocument = async (req, res) => {
         ip: clientIp,
         userAgent: req.headers['user-agent']
       }
+      console.log('✅ Hash de firma generado:', documentSignature.signatureHash)
 
       // Documento con firma: generar PDF completo
+      console.log('📝 Llamando a generateSignedPDF...')
       const pdfData = await generateSignedPDF({
         html,
         teacherId: teacher,
         documentType,
         documentVersion,
         signatures: [documentSignature] // Array con la firma
+      })
+      console.log('✅ PDF generado exitosamente:', {
+        fileName: pdfData.fileName,
+        hash: pdfData.hash,
+        agreementHash: pdfData.agreementHash
       })
       filePath = pdfData.filePath
       fileName = pdfData.fileName
@@ -278,13 +390,15 @@ const createTeacherSignedDocument = async (req, res) => {
 
       // Validar que todos los valores necesarios fueron generados
       if (!agreementHash) {
+        console.error('❌ Error: agreementHash no fue generado')
         throw new Error('El agreementHash no fue generado correctamente')
       }
       if (!hash) {
+        console.error('❌ Error: hash del documento no fue generado')
         throw new Error('El hash del documento no fue generado correctamente')
       }
 
-      console.log('Document generated with signature:', {
+      console.log('✅ Document generated with signature:', {
         documentHash: hash,
         agreementHash,
         fileName,
@@ -292,13 +406,16 @@ const createTeacherSignedDocument = async (req, res) => {
         signatureHash: documentSignature.signatureHash
       })
     } else {
+      console.log('📄 Procesando documento sin firma (pending)...')
       // Documento sin firma (pending): generar hash temporal del HTML
       hash = generateSHA256(html)
       const timestamp = Date.now()
       fileName = `${documentType}_v${documentVersion}_${teacher}_${timestamp}_pending.pdf`
       filePath = path.join(LEGAL_STORAGE_PATH, fileName)
+      console.log('📁 Ruta temporal del PDF:', filePath)
       
       // Generar PDF temporal sin firma
+      console.log('🖨️ Generando PDF temporal sin firma...')
       const browser = await puppeteer.launch({
         headless: 'new',
         args: [
@@ -306,24 +423,29 @@ const createTeacherSignedDocument = async (req, res) => {
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
           '--disable-gpu',
-          '--single-process'
+          '--disable-software-rasterizer'
         ],
-        executablePath: process.env.CHROME_PATH || puppeteer.executablePath()
+        executablePath: process.env.CHROME_PATH || puppeteer.executablePath(),
+        timeout: 60000
       })
       const page = await browser.newPage()
-      await page.setContent(html, { waitUntil: 'networkidle0' })
+      page.setDefaultNavigationTimeout(90000)
+      page.setDefaultTimeout(90000)
+      await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 90000 })
       const pdfBuffer = await page.pdf({
-        format: 'Letter',
+        format: 'A4',
         printBackground: true,
         margin: { top: '20mm', right: '15mm', bottom: '20mm', left: '15mm' }
       })
       fs.writeFileSync(filePath, pdfBuffer)
       await browser.close()
+      console.log('✅ PDF temporal generado exitosamente')
       
       generatedFilePath = filePath
     }
 
     // 2. Preparar agreementData para guardado (solo si hay firma)
+    console.log('📋 Preparando agreementData...')
     let agreementData = null
     if (signature) {
       agreementData = {
@@ -337,13 +459,18 @@ const createTeacherSignedDocument = async (req, res) => {
           role: signature.role || (documentType === 'teacher_principles' ? 'instructor' : 'admin')
         }]
       }
+      console.log('✅ agreementData preparado con firma')
+    } else {
+      console.log('⏭️ Saltando agreementData (sin firma)')
     }
 
     // 3. Crear el registro en la BD
+    console.log('💾 Preparando datos para guardar en BD...')
     const documentData = {
       teacher,
       documentType,
       documentVersion,
+      agreementVersion, // Versión calculada automáticamente
       documentHash: hash,
       html, // Guardar HTML para regenerar PDF al firmar
       pdfPath: filePath,
@@ -356,10 +483,24 @@ const createTeacherSignedDocument = async (req, res) => {
         (documentType === 'teacher_principles' ? 'active' : 'pending_teacher_signature') 
         : 'pending')
     }
+    console.log('📦 documentData base preparado:', {
+      teacher: documentData.teacher,
+      documentType: documentData.documentType,
+      documentVersion: documentData.documentVersion,
+      status: documentData.status,
+      hasHtml: !!documentData.html,
+      htmlLength: documentData.html?.length
+    })
 
     // Agregar campos opcionales solo si existen
-    if (agreementHash) documentData.agreementHash = agreementHash
-    if (agreementData) documentData.agreementData = agreementData
+    if (agreementHash) {
+      documentData.agreementHash = agreementHash
+      console.log('✅ agreementHash agregado:', agreementHash)
+    }
+    if (agreementData) {
+      documentData.agreementData = agreementData
+      console.log('✅ agreementData agregado')
+    }
     if (signature) {
       // Determinar el rol según el tipo de documento
       const signatureRole = signature.role || (documentType === 'teacher_principles' ? 'instructor' : 'admin')
@@ -379,14 +520,23 @@ const createTeacherSignedDocument = async (req, res) => {
         ip: clientIp,
         userAgent: req.headers['user-agent']
       }]
+      console.log('✅ Firma agregada al array signatures con rol:', signatureRole)
     }
 
+    console.log('💾 Creando documento en BD...')
     const document = new TeacherSignedDocument(documentData)
+    console.log('📝 Documento creado (sin guardar aún)')
+    
+    console.log('💾 Guardando documento en BD...')
     await document.save()
+    console.log('✅ Documento guardado exitosamente en BD con ID:', document._id)
 
     // Populate para devolver información completa
+    console.log('🔄 Populando información del teacher...')
     await document.populate('teacher')
+    console.log('✅ Información del teacher populada')
 
+    console.log('🎉 ========== DOCUMENTO CREADO EXITOSAMENTE ==========')
     res.status(201).json({
       message: 'Documento firmado creado exitosamente',
       document,
@@ -394,18 +544,29 @@ const createTeacherSignedDocument = async (req, res) => {
     })
 
   } catch (error) {
+    console.error('❌ ========== ERROR EN CREATE TEACHER SIGNED DOCUMENT ==========')
+    console.error('❌ Error completo:', error)
+    console.error('❌ Stack trace:', error.stack)
+    console.error('❌ Mensaje de error:', error.message)
+    console.error('❌ Nombre del error:', error.name)
+    
     // Rollback: Si falló el guardado en BD, eliminar el PDF generado
     if (generatedFilePath && fs.existsSync(generatedFilePath)) {
       try {
+        console.log('🗑️ Rollback: Eliminando PDF generado:', generatedFilePath)
         fs.unlinkSync(generatedFilePath)
+        console.log('✅ PDF eliminado en rollback')
       } catch (unlinkError) {
-        console.error('Error eliminando archivo tras fallo:', unlinkError)
+        console.error('❌ Error eliminando archivo tras fallo:', unlinkError)
       }
     }
 
+    console.error('❌ ========== FIN ERROR ==========')
     res.status(500).json({
       message: 'Error al crear el documento firmado',
-      detail: error.message
+      detail: error.message,
+      errorName: error.name,
+      errorStack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     })
   }
 }

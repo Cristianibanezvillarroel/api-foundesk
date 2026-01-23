@@ -35,7 +35,9 @@ coursesStatisticsRouter = require('./CoursesStatistics.router'),
 teacherSignedDocumentRouter = require('./TeacherSignedDocument.router'),
 enterpriseUserRouter = require('./EnterpriseUser.router'),
 enterpriseRouter = require('./Enterprise.router'),
-subscriptionPlanRouter = require('./SubscriptionPlan.router');
+subscriptionPlanRouter = require('./SubscriptionPlan.router'),
+docMainContractRouter = require('./DocMainContract.router'),
+docMainPrinciplesRouter = require('./DocMainPrinciples.router');
 
 // Definir las rutas y sus controladores
 router.use('/blog', blogRouter)
@@ -74,6 +76,8 @@ router.use('/teachersigneddocument', teacherSignedDocumentRouter);
 router.use('/enterpriseuser', enterpriseUserRouter);
 router.use('/enterprise', enterpriseRouter);
 router.use('/subscriptionplan', subscriptionPlanRouter);
+router.use('/docmaincontract', docMainContractRouter);
+router.use('/docmainprinciples', docMainPrinciplesRouter);
 
 
 module.exports = router;

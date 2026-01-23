@@ -23,6 +23,12 @@ const teachersigneddocumentSchema = new mongoose.Schema({
     required: true // ej: "1.0", "2.1"
   },
 
+  agreementVersion: {
+    type: String,
+    required: true,
+    default: '1.0' // ej: "1.0", "1.1", "1.2" - Se incrementa por cada acuerdo con el mismo documentVersion
+  },
+
   documentHash: {
     type: String,
     required: true,
@@ -65,10 +71,21 @@ const teachersigneddocumentSchema = new mongoose.Schema({
     },
     foundeskRut: String,
     foundeskRepresentative: String,
+    foundeskRutRepresentative: String,
+    foundeskEmailRepresentative: String,
     foundeskAddress: String,
     instructorFullName: String,
     instructorRut: String,
     instructorAddress: String,
+    instructorEmail: String,
+    instructorProfession: String,
+    clauses: [{
+      clauseNumber: Number,
+      title: String,
+      content: String,
+      hasVariables: Boolean,
+      variables: [String]
+    }],
     commissionPercentage: Number,
     poolCommissionPercentage: Number,
     settlementDays: Number,
@@ -109,7 +126,8 @@ const teachersigneddocumentSchema = new mongoose.Schema({
 teachersigneddocumentSchema.index({
   teacher: 1,
   documentType: 1,
-  documentVersion: 1
+  documentVersion: 1,
+  agreementVersion: 1
 })
 
 module.exports = mongoose.model(
