@@ -25,7 +25,7 @@ const getCourses = async (req, res) => {
 
 const coursesCreate = async (req, res) => {
     try {
-        const { title, description, descriptionAdd, categorie, teacher, imagecourse, prerequisites, targetaudience } = req.body;  
+        const { title, description, descriptionAdd, categorie, teacher, imagecourse, prerequisites, targetaudience, slug } = req.body;  
 
         const course = new Courses({
             title,
@@ -36,7 +36,7 @@ const coursesCreate = async (req, res) => {
             teacher,
             imagecourse,
             prerequisites,
-            target
+            targetaudience,
         })
 
         await course.save()
@@ -84,7 +84,7 @@ const getCoursesById = async (req, res) => {
 const coursesUpdate = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, descriptionAdd, categorie, teacher, imagecourse, prerequisites, targetaudience } = req.body;
+        const { title, description, descriptionAdd, categorie, teacher, imagecourse, prerequisites, targetaudience, slug } = req.body;
 
         const updated = await Courses.findByIdAndUpdate(
             id,
@@ -96,7 +96,8 @@ const coursesUpdate = async (req, res) => {
                 teacher,
                 imagecourse,
                 prerequisites,
-                targetaudience
+                targetaudience,
+                slug
             },
             { new: true }
         ).populate([
