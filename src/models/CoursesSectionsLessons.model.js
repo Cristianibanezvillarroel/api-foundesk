@@ -8,7 +8,7 @@ const coursessectionslessonsSchema = new mongoose.Schema({
     },
     name: {type: String},
     overview: {type: String},
-    durationMinutes: {type: Number},
+    minutes: {type: Number},
     createdAt: {type: Date, default: Date.now},
     updatedAt: {type: Date, default: Date.now}
 }, {collection: 'coursessectionslessons'})
