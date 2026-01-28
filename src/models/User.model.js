@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema({
     country: { type: String },
     lastname: { type: String },
     phone: { type: String },
+    gender: { 
+        type: String, 
+        enum: ['masculino', 'femenino', 'otro'],
+        default: null
+    },
     role: {
         type: [String],
         enum: ['student', 'instructor', 'entrepreneur', 'admin', 'superadmin'],
